@@ -1,14 +1,14 @@
 {
-    "extId": "601849b204436f796ec59f0f",
+    "extId": "62151777f1882d2383fd9393",
     "appName": "Friender",
-    "loginURL": "https://app.kyubi.io/api/end-user/login",
+    "loginURL": "https://dev.kyubi.io/api/end-user/login",
     "logoutURL": null,
-    "forgotPassURL": "https://app.kyubi.io/api/end-user/generate-password-token",
-    "changePassURL": "https://app.kyubi.io/api/end-user/update-password",
-    "checkUserStatusURL": "https://app.kyubi.io/api/end-user/get-status",
+    "forgotPassURL": "https://dev.kyubi.io/api/end-user/generate-password-token",
+    "changePassURL": "https://dev.kyubi.io/api/end-user/update-password",
+    "checkUserStatusURL": "https://dev.kyubi.io/api/end-user/get-status",
     "youtubeLink": "",
     "youtubeLink2": null,
-    "signupURL": "https://app.kyubi.io/",
+    "signupURL": "https://dev.kyubi.io/",
     "description": {
      "short_description": null,
      "long_description": "Meet the very FIRST software that turns your PERSONAL FACEBOOK PROFILE into a powerful CHATBOT AUTORESPONDER."
@@ -53,7 +53,7 @@
     "advertisementTextHtml": null,
     "mailTo": "support@tier5.us",
     "publicVapidKey": "BHcFkqcSHe3BS6EPkUWzYCXM2v4nSd541MqGyEao2EaSQeaQ_xfZrb8IcSasVN1G5pAwmDpXLNIjR7kTnEePOCA",
-    "clearSubscriptionObjectURL": "https://app.kyubi.io/api/clear-subscription-object",
-    "registerNotificationView": "https://app.kyubi.io/api/notification-view",
+    "clearSubscriptionObjectURL": "https://dev.kyubi.io/api/clear-subscription-object",
+    "registerNotificationView": "https://dev.kyubi.io/api/notification-view",
     "appBaseBackendUrl": ""
    }
