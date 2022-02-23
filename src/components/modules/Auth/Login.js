@@ -116,23 +116,27 @@ class Login extends Component {
                 // console.log("payload : ", payload);
             await AuthServices.login(payload).then(async result=>{
                 if(result.data.code  === 1){
-                    // console.log("result : ", result);
+                    console.log("result : ", result);
                     let token = result.data.token;
                     let tokens = token.split(".");
                     tokens =atob(tokens[1]);
                     let myObj = JSON.parse(tokens);
-                    // console.log("Tis Is my Obj",myObj)
+                     console.log("Tis Is my Obj",myObj)
                     //this.props.setProfileInfo(myObj);
                     // console.log("Tis Is my Obj11",this.props.ProfileInfo.profileInfo)
                     gfs.set({'kyubi_user_token': myObj.user.id});
-                    gfs.set({'inBackgroundFetching': true});
                     gfs.set({'kyubi_email': myObj.user.email});
-                    let LC=loginHelper.login();
-                        setTimeout(() => {
-                        this.setState({ loader: false });
-                        this.props.history.push('/dashboard');
-                        // console.log("sorry");
-                    }, 5000);
+                    this.setState({ loader: false });
+                    let UserPayload = {
+                        kyubi_user_token:myObj.user.id,
+                        user_email:myObj.user.email,
+                        plan:result.data.plan,
+                        status:result.data.status
+
+                    }
+                    console.log("Let Me Get The Data",UserPayload);
+                    //this.props.history.push('/dashboard');
+                    
                 }else{
                     this.setState({ loader: false });
                     this.setState({errorMessage:"User not found or In-Active"});
