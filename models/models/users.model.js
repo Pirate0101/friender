@@ -19,9 +19,8 @@ const UsersSchema = new Schema({
         default: 0
     },
     status: {
-        type: Number,
-        default: 0,
-        enum: [0, 1]
+        type: Boolean,
+        default: true 
     },
     createdAt: {
       type: Date,

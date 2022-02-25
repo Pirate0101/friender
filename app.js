@@ -14,7 +14,7 @@ require('dotenv').config();
 
 // Set up the express app
 const app = express();
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 8081;
 app.set('port', port);
 const server = http.createServer(app);
 
@@ -32,14 +32,14 @@ server.listen(port, function (err, data) {
   * also in here we are creating the system generated tags when the
   * mongo connection is successfull
 */
-(async () => {
-    try {
-      await require(path.join(__dirname, 'database', 'mongoose'))();
-      console.log('Mongoose DB is connected');
-    } catch (error) {
-      console.log('Hey, i am in error block in where calling my mongo db connection to make it open once:: ', error);
-    }
-  })();
+// (async () => {
+//     try {
+//       await require(path.join(__dirname, 'database', 'mongoose'))();
+//       console.log('Mongoose DB is connected');
+//     } catch (error) {
+//       console.log('Hey, i am in error block in where calling my mongo db connection to make it open once:: ', error);
+//     }
+//   })();
 // Log requests to the console.
 app.use(logger('dev'));
 app.use(bodyParser.json());
