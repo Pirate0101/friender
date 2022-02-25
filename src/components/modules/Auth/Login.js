@@ -126,7 +126,7 @@ class Login extends Component {
                     // console.log("Tis Is my Obj11",this.props.ProfileInfo.profileInfo)
                     gfs.set({'kyubi_user_token': myObj.user.id});
                     gfs.set({'kyubi_email': myObj.user.email});
-                    this.setState({ loader: false });
+                    
                     let UserPayload = {
                         kyubi_user_token:myObj.user.id,
                         user_email:myObj.user.email,
@@ -134,6 +134,19 @@ class Login extends Component {
                         status:result.data.status
 
                     }
+                    await AuthServices.GetOrStoreUser(UserPayload).then(async result=>{
+                        console.log(result);
+                        this.setState({ loader: false });
+                        gfs.set({'kyubi_plan': result.data.payload.plan});
+                        gfs.set({'kyubi_profile_count': result.data.payload.profile_count});
+                        gfs.set({'kyubi_profile_status': result.data.payload.status});
+                        this.props.history.push('/dashboard');
+                    }).catch(error=>{
+                        // console.log(error);
+                        this.setState({ loader: false });
+                        this.setState({errorMessage:"User not found or In-Active"});
+                        this.setState({ error:true});
+                    });
                     console.log("Let Me Get The Data",UserPayload);
                     //this.props.history.push('/dashboard');
                     

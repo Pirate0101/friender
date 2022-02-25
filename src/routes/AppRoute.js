@@ -10,7 +10,7 @@ const Login = lazy(() => import("../components/modules/Auth/Login"));
 const ForgotPassword = lazy(() => import("../components/modules/Auth/ForgotPassword"));
 const NotFound = lazy(() => import("../components/modules/Auth/NotFound"));
 const Dashboard = lazy(() => import("../components/modules/Main/Dashboard"));
-const Setting = lazy(() => import("../components/modules/Setting/setting"));
+const Setting = lazy(() => import("../components/modules/Setting/Setting"));
 const DelaySetting = lazy(() => import("../components/modules/DelaySetting/setting"));
 const AutoResponder = lazy(() => import("../components/modules/AutoResponder/autoResponder"));
 const AutoResponderCreate = lazy(() =>  import("../components/modules/AutoResponder/autoResponderCreate"))
