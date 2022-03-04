@@ -31,7 +31,7 @@ const loginHelper = {
                     // console.log("sugest in login helper", sugest);
                     setTimeout(()=>{
                         UserFacebookid = sugest.uid;
-                        UserFacebookUsername = sugest.path;
+                        UserFacebookUsername = sugest.path.replace('/', '');
                         UserFacebookName = sugest.text;
                         UserFacebookImage = sugest.photo;
                         UserLoggedInFacebook = true;

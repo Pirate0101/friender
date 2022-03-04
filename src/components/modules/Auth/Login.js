@@ -137,6 +137,7 @@ class Login extends Component {
                     await AuthServices.GetOrStoreUser(UserPayload).then(async result=>{
                         console.log(result);
                         this.setState({ loader: false });
+                        gfs.set({'user_id': result.data.payload._id});
                         gfs.set({'kyubi_plan': result.data.payload.plan});
                         gfs.set({'kyubi_profile_count': result.data.payload.profile_count});
                         gfs.set({'kyubi_profile_status': result.data.payload.status});

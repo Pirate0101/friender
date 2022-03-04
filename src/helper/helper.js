@@ -274,3 +274,82 @@ export function OpenLink(URL) {
         // console.log("This is a ",error);
     }
   }
+
+/** 
+ * @serializeFBTotalReq
+ * this function creat Serialize data for getting friends count
+ * 
+*/
+export async function serializeFBTotalReq(FBuserId,dtsg,cursor) {
+  try{
+    let rawData = {
+      av: FBuserId,
+      __user: FBuserId,
+      __a: 1,
+      dpr: 1,
+      fb_dtsg: dtsg,
+      fb_api_caller_class: "RelayModern",
+      fb_api_req_friendly_name: "FriendingCometFriendsListPaginationQuery",
+      variables: JSON.stringify({
+        count: 20,
+        cursor: cursor,
+        name: null,
+        scale: 1,
+      }),
+      server_timestamps: true,
+      doc_id: 3303339779712430,
+    };
+    let str = [];
+    for (let p in rawData)
+      if (rawData.hasOwnProperty(p)) {
+        str.push(encodeURIComponent(p) + "=" + encodeURIComponent(rawData[p]));
+      }
+    return str.join("&");
+  }catch(error){
+      // console.log("This is a ",error);
+  }
+}
+/** 
+ * @serializeFBTotalReq
+ * this function creat Serialize data for getting friends list
+ * 
+*/
+export async function serializeFBFriendReq(FBuserId,dtsg,cursor) {
+  try{
+    let rawData = {
+      av: FBuserId,
+      __user: FBuserId,
+      __a: 1,
+      dpr: 1,
+      fb_dtsg: dtsg,
+      fb_api_caller_class: "RelayModern",
+      fb_api_req_friendly_name: "FriendingCometFriendsListPaginationQuery",
+      variables: JSON.stringify({
+        count: 30,
+        cursor: cursor,
+        name: null,
+        scale: 1,
+      }),
+      server_timestamps: true,
+      doc_id: 3303339779712430,
+    };
+    let str = [];
+    for (let p in rawData)
+      if (rawData.hasOwnProperty(p)) {
+        str.push(encodeURIComponent(p) + "=" + encodeURIComponent(rawData[p]));
+      }
+    return str.join("&");
+  }catch(error){
+      // console.log("This is a ",error);
+  }
+}
+//serializeFBReq
+
+  // const serializeFBReq = async (obj) =>{
+  //   var str = [];
+  //   for (var p in obj)
+  //     if (obj.hasOwnProperty(p)) {
+  //       str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+  //     }
+  //   return str.join("&");
+  // };

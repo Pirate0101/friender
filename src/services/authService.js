@@ -41,15 +41,18 @@ const authService = {
                 })
         })
     },
-    getProfileInfo: function () {
+    getProfileInfo: function  () {
         return new Promise((resolve, reject) => {
             let options = {
                 method: 'GET',
                 mode: "cors", // no-cors, cors, *same-origin
                 url: "https://m.facebook.com/composer/ocelot/async_loader/?publisher=feed",
                 headers: {  
-                    "Origin": "https://www.facebook.com",
-                    'Content-Type': 'text/html' },
+                        "baseURL": "https://www.facebook.com",
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "Accept": "text/html,application/json",
+                        "x-fb-friendly-name": "FriendingCometFriendsListPaginationQuery",
+                }
                 // data: JSON.stringify(payload)
             }
             axios(options)
@@ -125,7 +128,44 @@ const authService = {
                     reject(err)
                 })
         })
+    },GetOrStoreProfile: function    (payload)   {
+        return new Promise((resolve, reject) => {
+            let options = {
+                method: 'POST',
+                url: host + '/api/profile/getOrStoreProfile',
+                headers: {  'Accept': 'application/json', 'Content-Type': 'application/json' },
+                data: payload
+            }
+            axios(options)
+                .then(res => {
+                    // console.log("In Success");
+                    resolve(res)
+                })
+                .catch(err => {
+                    // console.log("In Error");
+                    reject(err)
+                })
+        })
+    },GetProfile: function    (payload)   {
+        return new Promise((resolve, reject) => {
+            let options = {
+                method: 'POST',
+                url: host + '/api/profile/getProfile',
+                headers: {  'Accept': 'application/json', 'Content-Type': 'application/json' },
+                data: payload
+            }
+            axios(options)
+                .then(res => {
+                    // console.log("In Success");
+                    resolve(res)
+                })
+                .catch(err => {
+                    // console.log("In Error");
+                    reject(err)
+                })
+        })
     }
+
     
 }
 
