@@ -13,7 +13,7 @@ module.exports.getOrStoreUser = async (req, res) => {
                 usersDetailsArray['status']=req.body.status;
             }
             let UsersDetailinfo=Object.assign({}, usersDetailsArray);
-            let UpdateUserInfo=await UsersRepo.UpdateUserInfo(getUserInfo._id,UsersDetailinfo);
+            let UpdateUserInfo=await UsersRepo.UpdateUserInfo(getUserInfo.kyubi_user_token,UsersDetailinfo);
             let UpdatedgetUserInfo = await UsersRepo.GetUserById(req.body.kyubi_user_token);
             res.send({
                 code: 1,

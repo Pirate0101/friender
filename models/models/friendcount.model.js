@@ -1,26 +1,35 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const UsersSchema = new Schema({
-    kyubi_user_token: {
+const FriendcountSchema = new Schema({
+    user_id: {
+        type: Schema.Types.ObjectId,
+        ref: 'Users',
+        default: null
+    },
+    kyubi_user_token :  {
         type: String,
         default: ''
     },
-    user_email: {
+    UserFacebookid: {
         type: String,
         default: ''
     },
-    plan: {
+    totalCount: {
         type: Number,
         default: 0
     },
-    profile_count: {
+    totalActive:  {
         type: Number,
         default: 0
     },
-    status: {
+    totalScrap: {
+        type: Number,
+        default: 0
+    },
+    ScrapingStatus: {
         type: Boolean,
-        default: true 
+        default: false 
     },
     createdAt: {
       type: Date,
@@ -32,4 +41,4 @@ const UsersSchema = new Schema({
     }
 });
 // create the model for Users and expose it to our app
-module.exports = UsersSchema;
+module.exports = FriendcountSchema;

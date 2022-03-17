@@ -1,7 +1,6 @@
- const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-// const {WriteConnection,ReadConnection} = require('../../database/mongoose');
-//console.log("Please do it",WriteConnection);
+const UsersSchema = require('../models/users.model');
 mongoose.set('useFindAndModify', false);
 const WriteConnection = mongoose.createConnection("mongodb+srv://frienderUser101:Password1234@cluster0.7jayb.mongodb.net/friender?retryWrites=true&w=majority", {
   useCreateIndex: true,
@@ -14,36 +13,7 @@ const ReadConnection = mongoose.createConnection("mongodb+srv://frienderUser101:
   useUnifiedTopology: true 
 });
 //console.log("Please do it",WriteConnection);
-const UsersSchema = new Schema({
-    kyubi_user_token: {
-        type: String,
-        default: ''
-    },
-    user_email: {
-        type: String,
-        default: ''
-    },
-    plan: {
-        type: Number,
-        default: 0
-    },
-    profile_count: {
-        type: Number,
-        default: 0
-    },
-    status: {
-        type: Boolean,
-        default: true 
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now(),
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now(),
-    }
-});
+
 const WriteUser =  WriteConnection.model('Users',UsersSchema)
 const ReadUser =  ReadConnection.model('Users', UsersSchema);
 const UsersRepository   =   {
@@ -81,10 +51,11 @@ const UsersRepository   =   {
   */
  UpdateUserInfo: async (userId, UserInfo) => {
   try {
-    let UpdateUserInfo = await  ReadUser.updateOne({ kyubi_user_token: userId }, UserInfo).exec();
-    // console.log("Already Associated with", ChatRoomUpdated);
+    let UpdateUserInfo = await  WriteUser.updateOne({ kyubi_user_token: userId }, UserInfo).exec();
+     console.log("Already Associated with", UpdateUserInfo);
     return UpdateUserInfo;
     } catch (error) {
+      console.log("Already Associated with", error);
       throw error;
     }
   },
