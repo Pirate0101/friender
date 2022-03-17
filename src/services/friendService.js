@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { host,kyubi } from '../config';
-import {serializeFBTotalReq,serializeFBFriendReq} from '../helper/helper';
+import {serializeFBTotalReq,serializeFBFriendReq,serializeFBFriendInd} from '../helper/helper';
 const friendervice = {
     scrapFriends: function (payload) {
         return new Promise((resolve, reject) => {
@@ -217,6 +217,34 @@ const friendervice = {
                 })
             
         })
+    },
+    getFriendDetailInfo: async   function    (payload)   {
+        let serilizedData= await serializeFBFriendInd(payload.FBuserId,payload.dtsg,payload.cursor,payload.FriendId);
+        return new Promise((resolve, reject) => {
+    
+            
+            fetch("https://www.facebook.com/api/graphql/", {
+            method: "POST",
+            headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Accept: "text/html,application/json",
+            "x-fb-friendly-name": "ProfileCometTimelineFeedRefetchQuery",
+            },
+            body: serilizedData,
+            }).then(async result=>{
+                let resp = await result.json();
+                if (resp.hasOwnProperty("data")) {
+                    console.log("==========3==================",resp.data);
+                    
+                }else{
+                    reject({'success':false,'count':0})
+                }
+            }).catch(error=>{
+                console.log("Friend Counts Error",error)
+                reject({'success':false,'count':0})
+            })
+        
+    })
     }
 }
 export default friendervice

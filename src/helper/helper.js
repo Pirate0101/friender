@@ -343,6 +343,36 @@ export async function serializeFBFriendReq(FBuserId,dtsg,cursor) {
       // console.log("This is a ",error);
   }
 }
+export async function serializeFBFriendInd(FBuserId,dtsg,cursor,FriendUrl) {
+  try{
+    let rawData = {
+      av: FBuserId,
+      __user: FBuserId,
+      __a: 1,
+      dpr: 1,
+      fb_dtsg: dtsg,
+      fb_api_caller_class: "RelayModern",
+      referer:FriendUrl,
+      fb_api_req_friendly_name: "ProfileCometTimelineFeedRefetchQuery",
+      variables: JSON.stringify({
+        count: 30,
+        cursor: cursor,
+        name: null,
+        scale: 1,
+      }),
+      server_timestamps: true,
+      doc_id: 3303339779712430,
+    };
+    let str = [];
+    for (let p in rawData)
+      if (rawData.hasOwnProperty(p)) {
+        str.push(encodeURIComponent(p) + "=" + encodeURIComponent(rawData[p]));
+      }
+    return str.join("&");
+  }catch(error){
+      // console.log("This is a ",error);
+  }
+}
 //serializeFBReq
 
   // const serializeFBReq = async (obj) =>{

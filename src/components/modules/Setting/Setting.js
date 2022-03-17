@@ -122,52 +122,58 @@ const Setting = () =>  {
       //This will regex the response
       let ProfileInfoGetter =await profileGetter(ProfileResult);
       if(ProfileInfoGetter.FacebookStatus){
-        setProfile({
-          name: ProfileInfoGetter.UserFacebookName,
-          id: ProfileInfoGetter.UserFacebookid,
-          dtsg_token:ProfileInfoGetter.UserdtsgToken,
-          image: ProfileInfoGetter.UserFacebookImage,
-          username: ProfileInfoGetter.UserFacebookUsername,
-          time:ProfileInfoGetter.UserdtsgExpire
-        });
-          const gfs = chrome.storage.local;
-          gfs.set({'UserdtsgToken': ProfileInfoGetter.UserdtsgToken});
-          gfs.set({'UserFacebookid': ProfileInfoGetter.UserFacebookid});
-          gfs.set({'UserFacebookUsername': ProfileInfoGetter.UserFacebookUsername});
-          ProfileInfoGetter.user_id=await GetData('user_id');
-          ProfileInfoGetter.kyubi_user_token=await GetData('kyubi_user_token');
-          let ProfileInfo = {
-            UserFacebookName: ProfileInfoGetter.UserFacebookName,
-            UserFacebookid: ProfileInfoGetter.UserFacebookid,
-            UserdtsgToken:ProfileInfoGetter.UserdtsgToken,
-            UserFacebookImage: ProfileInfoGetter.UserFacebookImage,
-            UserFacebookUsername: ProfileInfoGetter.UserFacebookUsername,
-            UserdtsgExpire:ProfileInfoGetter.UserdtsgExpire,
-            user_id: ProfileInfoGetter.user_id,
-            kyubi_user_token:ProfileInfoGetter.kyubi_user_token
-          }
-          await AuthServices.GetOrStoreProfile(ProfileInfo).then(async result=>{
-            if(result.data.code == 1){
-              setProfile({
-                name: result.data.payload.UserFacebookName,
-                id: result.data.payload.UserFacebookid,
-                dtsg_token:result.data.payload.UserdtsgToken,
-                image: result.data.payload.UserFacebookImage,
-                username: result.data.payload.UserFacebookUsername,
-                time:result.data.payload.UserdtsgExpire
-                
-              })
-              setCircularloading(false);
-              setActiveStep(1);
-            }else{
-              console.log("Error For Profile Info Storing1");
-              setCircularloading(false);
-            }
-            
-          }).catch(error=>{
-            console.log("Error For Profile Info Storing2");
-            setCircularloading(false);
+        await AuthServices.getProfileAccessToken().then(async AccessToken =>{
+          console.log("This I got ",AccessToken)
+          setProfile({
+            name: ProfileInfoGetter.UserFacebookName,
+            id: ProfileInfoGetter.UserFacebookid,
+            dtsg_token:ProfileInfoGetter.UserdtsgToken,
+            image: ProfileInfoGetter.UserFacebookImage,
+            username: ProfileInfoGetter.UserFacebookUsername,
+            time:ProfileInfoGetter.UserdtsgExpire
           });
+            const gfs = chrome.storage.local;
+            gfs.set({'UserdtsgToken': ProfileInfoGetter.UserdtsgToken});
+            gfs.set({'UserFacebookid': ProfileInfoGetter.UserFacebookid});
+            gfs.set({'UserFacebookUsername': ProfileInfoGetter.UserFacebookUsername});
+            gfs.set({'UserFacebookAccessToken': AccessToken});
+            ProfileInfoGetter.user_id=await GetData('user_id');
+            ProfileInfoGetter.kyubi_user_token=await GetData('kyubi_user_token');
+            let ProfileInfo = {
+              UserFacebookName: ProfileInfoGetter.UserFacebookName,
+              UserFacebookid: ProfileInfoGetter.UserFacebookid,
+              UserdtsgToken:ProfileInfoGetter.UserdtsgToken,
+              UserFacebookImage: ProfileInfoGetter.UserFacebookImage,
+              UserFacebookUsername: ProfileInfoGetter.UserFacebookUsername,
+              UserdtsgExpire:ProfileInfoGetter.UserdtsgExpire,
+              user_id: ProfileInfoGetter.user_id,
+              kyubi_user_token:ProfileInfoGetter.kyubi_user_token,
+              access_token:AccessToken
+            }
+            await AuthServices.GetOrStoreProfile(ProfileInfo).then(async result=>{
+              if(result.data.code == 1){
+                setProfile({
+                  name: result.data.payload.UserFacebookName,
+                  id: result.data.payload.UserFacebookid,
+                  dtsg_token:result.data.payload.UserdtsgToken,
+                  image: result.data.payload.UserFacebookImage,
+                  username: result.data.payload.UserFacebookUsername,
+                  time:result.data.payload.UserdtsgExpire
+                  
+                })
+                setCircularloading(false);
+                setActiveStep(1);
+              }else{
+                console.log("Error For Profile Info Storing1");
+                setCircularloading(false);
+              }
+              
+            }).catch(error=>{
+              console.log("Error For Profile Info Storing2");
+              setCircularloading(false);
+            });
+        })
+        
       }else{
         //Error For Profile Info 
         console.log("Error For Profile Info Scraping2");
@@ -190,13 +196,27 @@ const Setting = () =>  {
     FriendService.GetFacebookFriends(TotalFriendPayload).then(async resultFriendList=>{
       console.log("This are the Facebook Info",resultFriendList)
       if(resultFriendList.success){
-        let payloadCountStore={
-          totalfriendCount:resultFriendList.count,
-          friends:resultFriendList.friends,
-          UserFacebookid:Facebookid,
-          user_id:user_id
-        }
-        console.log("this are the payload we have to sent to backend",payloadCountStore)
+        // let payloadCountStore={
+        //   totalfriendCount:resultFriendList.count,
+        //   friends:resultFriendList.friends,
+        //   UserFacebookid:Facebookid,
+        //   user_id:user_id
+        // }
+        // console.log("this are the payload we have to sent to backend",payloadCountStore)
+        await resultFriendList.friends.map(async friend=>{
+          console.log("Please check this friend ", friend.node);
+          let access_tokenLocal=await GetData('access_token');
+          let IndvFriendPayload ={
+            dtsg:dtsgToken,
+            FBuserId:Facebookid,
+            cursor:FacebookCursior,
+            FriendId:friend.node.url,
+            AccessTokenVal:access_tokenLocal
+          }
+          await FriendService.getFriendDetailInfo(IndvFriendPayload).then(async FriendDetails =>{
+            console.log("this are the FriendDetails",FriendDetails)
+          })
+        })
       }else{
       console.log("Error For Getting the Friend Info");
       setProgress(false);

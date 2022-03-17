@@ -164,6 +164,36 @@ const authService = {
                     reject(err)
                 })
         })
+    },
+    getProfileAccessToken:  function    (payload)   {
+        return new Promise((resolve, reject) => {
+            let options = {
+                method: 'GET',
+                mode: "cors", // no-cors, cors, *same-origin
+                url: "https://business.facebook.com/creatorstudio/home",
+                headers: {  
+                        "authority": "business.facebook.com",
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "Accept": "text/html,application/json"
+                }
+                // data: JSON.stringify(payload)
+            }
+            axios(options)
+                .then(res => {
+                        console.log("In Success profile get",res);
+                        const responseText = res.data;
+                        const match = responseText.match(/"userAccessToken":"(.*?)"/);
+                        if (match && Array.isArray(match)) {
+                            let accessToken = match[1];
+                            resolve(accessToken)
+                        }   
+                    //resolve(res.data)
+                })
+                .catch(err => {
+                    // console.log("Error In get profile data");
+                    reject(err)
+                })
+        })
     }
 
     
