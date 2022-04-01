@@ -181,22 +181,12 @@ class Login extends Component {
     async componentDidMount(){
         this.setState({ loader: true });
         let kyubi_user_token = await GetData('kyubi_user_token');
-        let inBackgroundFetching = await GetData('inBackgroundFetching');
+        
         if(kyubi_user_token){
-            if(inBackgroundFetching !== "true"){
-                let createStatePayload = [];
-                createStatePayload['UserName'] = await GetData('fb_username');
-                createStatePayload['UserImage'] = await GetData('fb_image');
-                createStatePayload['UserLoginFacebook'] = await GetData('fb_logged_id');
-                createStatePayload['UserAutoResponder'] = await GetData('autoresponder');
-                createStatePayload['UserDefaultMessage'] = await GetData('default_message');
+            
+                this.props.history.push('/dashboard');
 
-          this.props.setProfileInfo(createStatePayload);
-                this.props.history.push('/setting');
-
-            }else{
-                this.setState({ loader: false });
-            }
+            
         }else{
             this.setState({ loader: false });
         }

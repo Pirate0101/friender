@@ -127,6 +127,26 @@ export async function OpenFacebookProfileInTab() {
         // console.log("This is a ",error);
     }
 }
+/** 
+ * @OpenPortalInTab
+ * this function will open Friender Portal in a new Tab
+ * 
+*/
+export async function OpenPortalInTab() {
+  try{
+      let kyubi_user_token = await GetData('kyubi_user_token');
+      
+      const myNewUrl  =   'http://localhost:3000/setlaunchpad/'+kyubi_user_token;
+      let CreateTab    =   chrome.tabs.create({
+          url: myNewUrl,
+          active: true
+        });
+        // console.log("This is a ",CreateTab);
+        return CreateTab;
+  }catch(error){
+      // console.log("This is a ",error);
+  }
+}
 
 export  const getDTSG = function () {    
   AuthServices.getProfileInfo().then((result) => {

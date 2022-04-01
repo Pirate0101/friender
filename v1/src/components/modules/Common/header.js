@@ -222,23 +222,7 @@ class header extends Component {
               )}
               <div className="logo"><img src={process.kyubi.logo.primary_logo} alt="" /></div>
               <div className="hBtnWrapper">
-                <div className="toogler">
-                  <label className="switch_box box_1">
-                    {this.state.autoresponder_status == "1" || this.state.default_message == "1" ?
-                      <div>
-                        <input type="checkbox" className="switch_1" name="meven_status" onChange={this.autoSetting} id="swich" name="togg" checked/>
-                        <div className="toogler"></div>
-                      </div>
-                      
-                    :
-                      <div>
-                        <input type="checkbox" className="switch_1" name="meven_status" onChange={this.autoSetting} id="swich" name="togg" />
-                        <div className="toogler"></div>
-                      </div>
-                    }
-
-                  </label>
-                </div>
+                
                 <div className="slide_menu_click">
                   <a href="#" className="side_click" onClick={this.ShowMenu} ><img src={sideMenuLogo}/></a>
                   <div className={this.state.openNavBar ?"slider_menu active":"slider_menu"}>
@@ -250,8 +234,7 @@ class header extends Component {
                       </div>
                       <ul className="menunav">
                         <li><NavLink  to="/dashboard"><img src="images/menuicon4.svg" /> Dashboard</NavLink></li>
-                        <li><NavLink  to="/setting"><img src="images/menuicon3.svg"/> Settings</NavLink></li>
-                        <li><NavLink  to="/delay_setting"><img src="images/menuicon3.svg"/> Delay Setting</NavLink></li>
+                        
                         <li><NavLink  to="/logout"><img src="images/menuicon1.svg"/> Logout</NavLink></li>
                       </ul>
                   </div>
