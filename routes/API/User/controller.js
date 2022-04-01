@@ -40,4 +40,31 @@ module.exports.getOrStoreUser = async (req, res) => {
         })
     }
 }
+module.exports.getUserInfoWithKyubiId   =   async   (req,res)=>{
+    try {
+        console.log("++++++++++++++++++++++++++++++++++++++",req.body.worlid);
+        
+        let UpdatedgetUserInfo = await UsersRepo.GetUserById(req.body.worlid);
+        if(UpdatedgetUserInfo){
+            res.send({
+                code: 1,
+                message: "Successfully User Added",
+                payload: {UpdatedgetUserInfo}
+            });
+        }else{
+            res.send({
+                code: 2,
+                message: "Sorry No User Present with this user Id",
+                payload: {}
+            });
+        }
+        
+    } catch (error) {
+        res.send({
+            code: 3,
+            message: error.message,
+            payload: error
+        })
+    }
+}
 

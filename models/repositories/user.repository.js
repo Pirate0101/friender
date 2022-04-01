@@ -1,21 +1,21 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-const UsersSchema = require('../models/users.model');
-mongoose.set('useFindAndModify', false);
-const WriteConnection = mongoose.createConnection("mongodb+srv://frienderUser101:Password1234@cluster0.7jayb.mongodb.net/friender?retryWrites=true&w=majority", {
-  useCreateIndex: true,
-  useNewUrlParser: true,
-  useUnifiedTopology: true 
-});
-const ReadConnection = mongoose.createConnection("mongodb+srv://frienderUser101:Password1234@cluster0.7jayb.mongodb.net/friender?readOnly=true&readPreference=secondary", {
-  useCreateIndex: true,
-  useNewUrlParser: true,
-  useUnifiedTopology: true 
-});
+// const Schema = mongoose.Schema;
+// const UsersSchema = require('../models/users.model');
+// mongoose.set('useFindAndModify', false);
+// const WriteConnection = mongoose.createConnection("mongodb+srv://frienderUser101:Password1234@cluster0.7jayb.mongodb.net/friender?retryWrites=true&w=majority", {
+//   useCreateIndex: true,
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true 
+// });
+// const ReadConnection = mongoose.createConnection("mongodb+srv://frienderUser101:Password1234@cluster0.7jayb.mongodb.net/friender?readOnly=true&readPreference=secondary", {
+//   useCreateIndex: true,
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true 
+// });
 //console.log("Please do it",WriteConnection);
-
-const WriteUser =  WriteConnection.model('Users',UsersSchema)
-const ReadUser =  ReadConnection.model('Users', UsersSchema);
+const { User_Read,User_Write} = require('../models/moduleReadWrite');
+// const WriteUser =  WriteConnection.model('Users',UsersSchema)
+// const ReadUser =  ReadConnection.model('Users', UsersSchema);
 const UsersRepository   =   {
   /**
     * @GetUserById
@@ -23,7 +23,7 @@ const UsersRepository   =   {
   */
  GetUserById: async (UserId) => {
     try {
-      let UserInfo = await ReadUser.findOne({ 'kyubi_user_token': UserId }).exec();
+      let UserInfo = await User_Read.findOne({ 'kyubi_user_token': UserId }).exec();
       return UserInfo;
     } catch (e) {
       throw e;
@@ -35,7 +35,7 @@ const UsersRepository   =   {
   */
  saveUserDetails: async (data) => {
     try {
-      let UserInfo = await  WriteUser.create(data);
+      let UserInfo = await  User_Write.create(data);
       if (!UserInfo) {
         return null;
       }
@@ -45,13 +45,13 @@ const UsersRepository   =   {
     }
   },
 
-    /**
+  /**
     * @UpdateUserInfo
     * update User Info
   */
  UpdateUserInfo: async (userId, UserInfo) => {
   try {
-    let UpdateUserInfo = await  WriteUser.updateOne({ kyubi_user_token: userId }, UserInfo).exec();
+    let UpdateUserInfo = await  User_Write.updateOne({ kyubi_user_token: userId }, UserInfo).exec();
      console.log("Already Associated with", UpdateUserInfo);
     return UpdateUserInfo;
     } catch (error) {
