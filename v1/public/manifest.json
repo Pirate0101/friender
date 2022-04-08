@@ -41,8 +41,16 @@
     "https://*.facebook.com/*",
     "https://m.facebook.com/*",
     "https://api.mefnevan.com/api",
-    "https://dev.kyubi.io/*"
+    "https://dev.kyubi.io/*",
+    "https://friennder.ngrok.io/*",
+    "https://localhost:3000/"
 ],
+"externally_connectable": {
+  "matches": [
+    "https://friennder.ngrok.io/*",
+    "https://localhost:3000/"
+  ]
+},
 "content_scripts": [
    
     {

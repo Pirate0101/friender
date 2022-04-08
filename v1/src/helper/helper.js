@@ -136,7 +136,7 @@ export async function OpenPortalInTab() {
   try{
       let kyubi_user_token = await GetData('kyubi_user_token');
       
-      const myNewUrl  =   'http://localhost:3000/setlaunchpad/'+kyubi_user_token;
+      const myNewUrl  =   'https://friennder.ngrok.io/setlaunchpad/'+kyubi_user_token;
       let CreateTab    =   chrome.tabs.create({
           url: myNewUrl,
           active: true
