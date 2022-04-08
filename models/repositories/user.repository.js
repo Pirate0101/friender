@@ -1,34 +1,60 @@
 const mongoose = require('mongoose');
-// const Schema = mongoose.Schema;
-// const UsersSchema = require('../models/users.model');
-// mongoose.set('useFindAndModify', false);
-// const WriteConnection = mongoose.createConnection("mongodb+srv://frienderUser101:Password1234@cluster0.7jayb.mongodb.net/friender?retryWrites=true&w=majority", {
-//   useCreateIndex: true,
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true 
-// });
-// const ReadConnection = mongoose.createConnection("mongodb+srv://frienderUser101:Password1234@cluster0.7jayb.mongodb.net/friender?readOnly=true&readPreference=secondary", {
-//   useCreateIndex: true,
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true 
-// });
-//console.log("Please do it",WriteConnection);
 const { User_Read,User_Write} = require('../models/moduleReadWrite');
-// const WriteUser =  WriteConnection.model('Users',UsersSchema)
-// const ReadUser =  ReadConnection.model('Users', UsersSchema);
 const UsersRepository   =   {
-  /**
-    * @GetUserById
-    * Get user As Per _id
-  */
- GetUserById: async (UserId) => {
+
+  GetUserById: async (UserId) => {
     try {
-      let UserInfo = await User_Read.findOne({ 'kyubi_user_token': UserId }).exec();
+      let UserInfo = await User_Read.aggregate([
+        {
+          $lookup:
+          {
+            from: 'profiles',
+            localField: '_id',
+            foreignField: 'user_id',
+            as: 'profilesinfo'
+          }
+        },
+        {
+          $unwind: {
+            path: '$profilesinfo',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $match: {
+            'kyubi_user_token': UserId 
+          }
+        },
+        {
+          $group: {
+            '_id': '$_id',
+            kyubi_user_token: {
+              $first: '$kyubi_user_token'
+            },
+            user_email: {
+              $first: '$user_email'
+            },
+            plan: {
+              $first: '$plan'
+            },
+            profile_count: {
+              $first: '$profile_count'
+            },
+            status: {
+              $first: '$status'
+            },
+            profilesinfo: {
+              $push: '$profilesinfo'
+            }
+          }
+        }
+      ]).exec();
       return UserInfo;
     } catch (e) {
       throw e;
     }
   },
+  
     /**
     * @saveUserDetails
     * save User Details in mongo db
@@ -51,7 +77,7 @@ const UsersRepository   =   {
   */
  UpdateUserInfo: async (userId, UserInfo) => {
   try {
-    let UpdateUserInfo = await  User_Write.updateOne({ kyubi_user_token: userId }, UserInfo).exec();
+    let UpdateUserInfo = await  User_Write.updateOne({ _id: userId }, UserInfo).exec();
      console.log("Already Associated with", UpdateUserInfo);
     return UpdateUserInfo;
     } catch (error) {

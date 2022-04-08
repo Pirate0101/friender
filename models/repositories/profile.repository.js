@@ -1,22 +1,5 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-
-const ProfilesSchema =require('../models/profiles.model');
-mongoose.set('useFindAndModify', false);
-const WriteConnection = mongoose.createConnection("mongodb+srv://frienderUser101:Password1234@cluster0.7jayb.mongodb.net/friender?retryWrites=true&w=majority", {
-  useCreateIndex: true,
-  useNewUrlParser: true,
-  useUnifiedTopology: true 
-});
-const ReadConnection = mongoose.createConnection("mongodb+srv://frienderUser101:Password1234@cluster0.7jayb.mongodb.net/friender?readOnly=true&readPreference=secondary", {
-  useCreateIndex: true,
-  useNewUrlParser: true,
-  useUnifiedTopology: true 
-});
-
-const WriteProfile =  WriteConnection.model('Profiles',ProfilesSchema);
-const ReadProfile =  ReadConnection.model('Profiles', ProfilesSchema);
-
+const { Profile_Read,Profile_Write} = require('../models/moduleReadWrite');
 const ProfilesRepository   =   {
     /**
       * @GetProfileByParam
@@ -24,7 +7,7 @@ const ProfilesRepository   =   {
     */
      GetProfileByParam: async (ProfileId,FacebookId) => {
       try {
-        let ProfileInfo = await ReadProfile.findOne({ user_id : mongoose.Types.ObjectId(ProfileId), UserFacebookid:FacebookId}).exec();
+        let ProfileInfo = await Profile_Read.findOne({ user_id : mongoose.Types.ObjectId(ProfileId), UserFacebookid:FacebookId}).exec();
         return ProfileInfo;
       } catch (e) {
         throw e;
@@ -36,7 +19,7 @@ const ProfilesRepository   =   {
 */
  GetProfileById: async (profileId) => {
     try {
-      let UserInfo = await ReadProfile.findOne({ '_id': profileId }).exec();
+      let UserInfo = await Profile_Read.findOne({ '_id': profileId }).exec();
       return UserInfo;
     } catch (e) {
       throw e;
@@ -48,7 +31,7 @@ const ProfilesRepository   =   {
 */
    saveProfileDetails: async (data) => {
       try {
-        let ProfileInfoNew = await  WriteProfile.create(data);
+        let ProfileInfoNew = await  Profile_Write.create(data);
         if (!ProfileInfoNew) {
           return null;
         }
@@ -66,8 +49,9 @@ const ProfilesRepository   =   {
 */
     UpdateProfileInfo: async (profileId, ProfileInfo) => {
     try {
-      let UpdateUserInfo = await  WriteProfile.updateOne({ _id: profileId }, ProfileInfo).exec();
-      // console.log("Already Associated with", ChatRoomUpdated);
+      console.log("51");
+      let UpdateUserInfo = await  Profile_Write.updateOne({ _id: profileId }, ProfileInfo).exec();
+      console.log("54");
       return UpdateUserInfo;
       } catch (error) {
         throw error;
@@ -78,22 +62,26 @@ const ProfilesRepository   =   {
     * @UpdateProfileManyInfo
     * update Many Profile Info
 */
-UpdateProfileManyInfo: async (UserId, ProfileInfo) => {
+UpdateProfileManyInfo: async (UserId,UserFacebookid, ProfileInfo) => {
     try {
-      let UpdateManyProfile = await  WriteProfile.updateMany({ user_id: UserId }, ProfileInfo).exec();
-      // console.log("Already Associated with", ChatRoomUpdated);
+      
+      let UpdateManyProfile = await  Profile_Write.updateMany({ 'user_id': mongoose.Types.ObjectId(UserId), 'UserFacebookid':UserFacebookid}, ProfileInfo).exec();
+      
       return UpdateManyProfile;
       } catch (error) {
         throw error;
       }
     },
+
 /**
 * @GetActiveProfile
 * get the Active Profile info by a specified field from Mongo DB
 */
-GetActiveProfile: async (id) => {
+UpdateProfile: async (id, ProfileInfoDetails) => {
     try {
-      let ProfileInfo = await ReadProfile.findOne({ 'user_id': mongoose.Types.ObjectId(id),'status':true }).exec();
+      console.log("81");
+      let ProfileInfo = await Profile_Write.updateMany({ 'user_id': mongoose.Types.ObjectId(id)}, ProfileInfoDetails).exec();
+      console.log("84");
       return ProfileInfo;
     } catch (e) {
       throw e;

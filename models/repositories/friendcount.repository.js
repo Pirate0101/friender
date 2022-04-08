@@ -1,22 +1,5 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-
-const FriendcountSchema =require('../models/friendcount.model');
-mongoose.set('useFindAndModify', false);
-const WriteConnection = mongoose.createConnection("mongodb+srv://frienderUser101:Password1234@cluster0.7jayb.mongodb.net/friender?retryWrites=true&w=majority", {
-  useCreateIndex: true,
-  useNewUrlParser: true,
-  useUnifiedTopology: true 
-});
-const ReadConnection = mongoose.createConnection("mongodb+srv://frienderUser101:Password1234@cluster0.7jayb.mongodb.net/friender?readOnly=true&readPreference=secondary", {
-  useCreateIndex: true,
-  useNewUrlParser: true,
-  useUnifiedTopology: true 
-});
-
-const WriteFriendCount =  WriteConnection.model('FriendCount',FriendcountSchema);
-const ReadFriendCount =  ReadConnection.model('FriendCount', FriendcountSchema);
-
+const { Friendscount_Read,Friendscount_Write} = require('../models/moduleReadWrite');
 
 const FriendcountsRepository   =   {
     /**
@@ -25,7 +8,7 @@ const FriendcountsRepository   =   {
     */
      GetFriendCountByParam: async (UserId,FacebookId) => {
       try {
-        let FriendCountInfo = await ReadFriendCount.findOne({ user_id : mongoose.Types.ObjectId(UserId), UserFacebookid:FacebookId}).exec();
+        let FriendCountInfo = await Friendscount_Read.findOne({ user_id : mongoose.Types.ObjectId(UserId), UserFacebookid:FacebookId}).exec();
         return FriendCountInfo;
       } catch (e) {
         throw e;
@@ -37,7 +20,7 @@ const FriendcountsRepository   =   {
   */
  saveFriendCountDetails: async (data) => {
   try {
-    let UserInfo = await  WriteFriendCount.create(data);
+    let UserInfo = await  Friendscount_Write.create(data);
     if (!UserInfo) {
       return null;
     }
@@ -45,6 +28,20 @@ const FriendcountsRepository   =   {
   } catch (e) {
     throw e;
   }
-}
+},
+/**
+    * @UpdateFriendCountManyInfo
+    * update Many Profile Info
+*/
+UpdateFriendCountManyInfo: async (UserId,UserFacebookid, FriendCOuntInfo) => {
+  try {
+    
+    let UpdateManyProfile = await  Friendscount_Write.updateMany({ 'user_id': mongoose.Types.ObjectId(UserId), 'UserFacebookid':UserFacebookid}, FriendCOuntInfo).exec();
+    
+    return UpdateManyProfile;
+    } catch (error) {
+      throw error;
+    }
+  },
 }
 module.exports = FriendcountsRepository;

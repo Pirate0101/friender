@@ -1,0 +1,12 @@
+{
+    "apps": [
+      {
+        "name": "friender_backend",
+        "script": "npm",
+        "args": "start",        
+        "env": {
+          "PORT": "8081"
+         }
+      }
+    ]
+  }
