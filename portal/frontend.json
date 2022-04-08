@@ -1,7 +1,7 @@
 {
     "apps": [
       {
-        "name": "frontend",
+        "name": "friender_portal",
         "script": "npm",
 	"args":	"start",        
         "env": {

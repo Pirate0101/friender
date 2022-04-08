@@ -5,6 +5,7 @@ import ProtectedRoute from './component/Middlewares/protectedRoute'
 import UnProtectedRoute from './component/Middlewares/unProtectedRoute'
 import DefaultLayout from './component/Layout/defaultlayout';
 import MainLayout from "./component/Layout/mainlayout";
+//import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import './App.css';
 function App() {
   return (

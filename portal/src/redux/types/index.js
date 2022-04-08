@@ -1,2 +1,3 @@
-export const SET_FIRST_NAME = "SET_FIRST_NAME";
-export const SET_LAST_NAME = "SET_LAST_NAME";
+
+export const SET_USER_DETAILS   =   "SET_USER_DETAILS";
+export const SET_USER_PROFILE   =   "SET_USER_PROFILE";

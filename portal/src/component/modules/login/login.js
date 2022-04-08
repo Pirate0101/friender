@@ -1,11 +1,8 @@
 import React,{Component} from 'react';
-import { NavLink,Redirect, withRouter } from 'react-router-dom';
+import { Redirect} from 'react-router-dom';
 import { kyubiExtensionId } from '../../../config';
 import AuthServices from "../../../Services/authService";
-import validator from 'validator';
-import jwtDecode from 'jwt-decode'
-import {connect}            from 'react-redux';
-import * as authAction      from '../../../store/actions/Auth/authAction'
+
 import Logo from "../../../images/logo.svg";
 
   class Login extends Component {
@@ -194,17 +191,5 @@ import Logo from "../../../images/logo.svg";
         );
     }
 }
-const mapStateToProps = (state) => {
-  return {
-      decodedPermissions : state.auth.payload != null 
-          ? state.auth.payload
-          : ''
-  }
-}
-const mapDispatchToProps = (dispatch) => {
-return {
-    setPermissions : (load) => dispatch(authAction.addPermissionsFunc(load)),
-    setProfileInfo : (load) => dispatch(authAction.addProfileInfo(load))
-}
-}
-export default connect(mapStateToProps, mapDispatchToProps)(Login);
+
+export default Login;
