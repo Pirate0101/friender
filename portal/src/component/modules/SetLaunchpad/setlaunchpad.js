@@ -4,6 +4,7 @@ import { Panel,Steps,Button, ButtonGroup,ButtonToolbar,IconButton,Loader,Placeho
 
 import GearIcon from '@rsuite/icons/Gear';
 import PeoplesUploadedIcon from '@rsuite/icons/PeoplesUploaded';
+import SearchPeopleIcon from '@rsuite/icons/SearchPeople';
 import PeopleFliterIcon from '@rsuite/icons/PeopleFliter';
 import UserInfoIcon from '@rsuite/icons/UserInfo';
 import "rsuite/dist/rsuite.min.css";
@@ -12,11 +13,13 @@ import { updateUserDetails,  updateUserProfiles } from "../../../redux/actions";
 import Logo from "../../../images/logo.svg";
 import AuthServices from "../../../Services/authService";
 import ProfileService from '../../../Services/profileServices';
+import FriendService from '../../../Services/friendServices';
 import io from "socket.io-client";
 import { socketUrl } from '../../../config';
 import ProfileCard from './profilecard';
 import { css } from "@emotion/react";
 import ClipLoader from "react-spinners/ClipLoader";
+import BounceLoader from "react-spinners/BounceLoader";
 const ENDPOINT = socketUrl;
 const override = css`
   display: block;
@@ -36,11 +39,18 @@ const Dashboard = (props) => {
                                                         UserdtsgToken: "",
                                                         access_token: "",
                                                         kyubi_user_token: "",
+                                                        collectionToken:"",
                                                         user_id:""
                                                         });
     const [workloader,setWorkLoader]=React.useState(false);
     let [loading, setLoading] = React.useState(false);
+    let [totalScrapedFriend, setTotalScrapedFriend] = React.useState(0);
+    let [friendScrapingStatus, setFriendScrapingStatus] = React.useState("Initiated");
+    let [scrapingStatus, setScrapingStatus] = React.useState(false);
+    let [scrapIndividualFriend, setScrapIndividualFriend] = React.useState(false);
     let [color, setColor] = useState("#ffffff");
+    let [totalDeepScrapedFriend, settotalDeepScrapedFriend] = React.useState(false);
+    let [friendDeepScrapingStatus, setfriendDeepScrapingStatus] = React.useState(false);
     const dispatch = useDispatch();
     
     const onChange = nextStep => {
@@ -67,21 +77,48 @@ const Dashboard = (props) => {
         UserdtsgToken   :   userProfiles.UserdtsgToken,
         access_token    :   userProfiles.access_token,
         UserFacebookUsername    :   userProfiles.UserFacebookUsername,
+        UsercollectionToken :   userProfiles.UsercollectionToken,
+        UserProfileId   : userProfiles.id,
         end_cursor : ""
         
     };
-    console.log("This are the Active Profiles We are Using",parameter);
+    // console.log("This are the Active Profiles We are Using",userProfiles);
+    // console.log("This are the Active Profiles We are Using",parameter);
     chrome.runtime.sendMessage("bpcohjgcoconcdhepkkgeimeehhellda",{type: "GetFacebookFriends", options: parameter});
     const socket = io(ENDPOINT, {
         transports: ["websocket", "polling"] ,// use WebSocket first, if available
         
     });
     socket.emit('join', userDetails.kyubi_user_token);
-    socket.on('userFacebookFriendSend', message => {
+    socket.on('userFacebookFriendSend', async message => {
         console.log("This are the Friends Innnnnnnnnnnnnnn",message);
-        
-        
+        setTotalScrapedFriend(message.totalScrap);
+        setScrapingStatus(message.ScrapingStatus);
+        if(message.ScrapingStatus){
+            setFriendScrapingStatus("Prcessing");
+        }else{
+            setFriendScrapingStatus("Done");
+            
+            
+        }
     });
+  }
+  const GetFriendDetails = async    ()  =>  {
+      console.log("Hi We ARe Here")
+    let UserPasyload = {
+        Id :   userDetails._id,
+        UserFacebookid  :   userProfiles.id
+    };
+    await FriendService.GetUserFriendsbase(UserPasyload).then(result=>{
+        console.log(result)
+        if(result.data.code === 1){
+            chrome.runtime.sendMessage("bpcohjgcoconcdhepkkgeimeehhellda",{type: "GetFriendsFaceBookDetails", options: result.data.payload});
+        }
+        
+        //setScrapIndividualFriend(true);
+    }).catch(error=>{
+        
+    }) 
   }
   
   const nameReducer = useSelector((state) => state.nameReducer);
@@ -119,6 +156,7 @@ const Dashboard = (props) => {
                             ProfileArray['UserFacebookUsername']=eachProfile.UserFacebookUsername;
                             ProfileArray['UserFacebookName']=eachProfile.UserFacebookName;
                             ProfileArray['UserFacebookImage']=eachProfile.UserFacebookImage;
+                            ProfileArray['UsercollectionToken']=eachProfile.UsercollectionToken;
                             dispatch(updateUserProfiles(ProfileArray));
                         }
                         
@@ -149,13 +187,6 @@ const Dashboard = (props) => {
                 createStatePayload['plan'] = results.data.payload.UserInfo[0].plan;
                 createStatePayload['profile_count'] = results.data.payload.UserInfo[0].profile_count;
                 createStatePayload['status'] = results.data.payload.UserInfo[0].status;
-                // let UserDetailsArray={
-                // "kyubi_user_token":results.data.payload.UserInfo[0].kyubi_user_token,
-                // "_id":results.data.payload.UserInfo[0]._id,
-                // "plan":results.data.payload.UserInfo[0].plan,
-                // "profile_count":results.data.payload.UserInfo[0].profile_count,
-                // "status":results.data.payload.UserInfo[0].status
-                // }
                 
                 dispatch(updateUserDetails(createStatePayload));
             }
@@ -178,6 +209,7 @@ const Dashboard = (props) => {
                      merged ={...merged,[item]: message[item]}
                    
                 })
+                
                 setProfileValues(merged);
                 setWorkLoader(false);
             })
@@ -233,6 +265,7 @@ const Dashboard = (props) => {
                 <IconButton appearance="primary" onClick={ConnectFacebookAccounts} color="blue" icon={<UserInfoIcon />}>
                   Connect Facebook Account
                 </IconButton>
+
                 {(profilevalues.UserdtsgToken) ?
                 <Button onClick={onNext} disabled={step === 3}>
                 Next
@@ -254,16 +287,43 @@ const Dashboard = (props) => {
                 ?
                 <div className="sweet-loading">
                
-
-                <ClipLoader color={color} loading={loading} css={override} size={150} />hi
+                        <Panel header="We are Syncking all your Friends from Facebook Please Be Patient " shaded>
+                            <ClipLoader color={color} loading={loading} css={override} size={150} />
+                            <dl>
+                                <dt>Total Friend Scraped:</dt>
+                                <dd>{totalScrapedFriend}</dd>
+                                <dt>Scraping Status:</dt>
+                                <dd>{friendScrapingStatus}</dd>
+                            </dl>
+                        </Panel>
+                        
+                       
+                        
                 </div>
     :
             <ButtonToolbar>
                 <h1>Please Sync Your FaceBook Friends</h1>
+                {scrapingStatus ?
+                <Panel header="We are Syncking all your Friends from Facebook Please Be Patient " shaded>
+                <ClipLoader color={color} loading={loading} css={override} size={150} />
+                <dl>
+                <dt>Total Friend Scraped:</dt>
+                <dd>{totalScrapedFriend}</dd>
+                <dt>Scraping Status:</dt>
+                <dd>{friendScrapingStatus}</dd>
+
+                </dl>
+            </Panel>
+                :
+                ""
+                }
+                
             <IconButton appearance="primary"  onClick={SyncFacebookFriends} color="blue" icon={<PeoplesUploadedIcon />}>
               Sync Friends
             </IconButton>
-            
+            <IconButton appearance="primary" onClick={GetFriendDetails} color="blue" icon={<SearchPeopleIcon />}>
+                  Get Friend Details
+            </IconButton>
           </ButtonToolbar>
             }
                </div>
