@@ -39,6 +39,10 @@ const ProfilesSchema = new Schema({
         type: String,
         default: ''
     },
+    UsercollectionToken: {
+        type: String,
+        default: ''
+    },
     status: {
         type: Boolean,
         default: true 

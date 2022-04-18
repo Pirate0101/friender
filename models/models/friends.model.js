@@ -7,6 +7,11 @@ const FriendsSchema = new Schema({
         ref: 'Users',
         default: null
     },
+    profileId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Profiles',
+        default: null
+    },
     kyubi_user_token :  {
         type: String,
         default: ''

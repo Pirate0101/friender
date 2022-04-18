@@ -11,27 +11,37 @@ let socketc = io(ENDPOINT, {
 });
 module.exports.storeUserFriends = async (req, res) => {
     try {
-        console.log("This Are the Friends Info",req.body)
+        
         let FriendsList = [];
         let TotalFriend =0;
         await req.body.friends.map(async (friends,key)=>{
+            let findFriend=await FriendRepo.CheckFriendsDetails(friends.friend.id,req.body.User_id);
+            console.log("This Are the Friends Info",findFriend)
+            if(findFriend){
+                console.log("I ammmmmmmmmmm",findFriend)
+            }else{
+                console.log("I XXXXXXXXXXXXX",findFriend)
+               let FriendsListNew={
+                    user_id: req.body.User_id,
+                    kyubi_user_token :  req.body.kyubi_user_token,
+                    UserFacebookName: friends.friend.name,
+                    UserFacebookid: friends.friend.id,
+                    FriendshipStatus: friends.friend.friendship_status,
+                    Gender: friends.friend.gender,
+                    ShortName: friends.friend.short_name,
+                    ProfileURL: friends.friend.url,
+                    UserFacebookImage:  friends.friend.profile_picture.uri,
+                    SubscribeStatus:  friends.friend.subscribe_status,
+                    profileId:req.body.profileId
+                };
+                await FriendRepo.saveFBFriendDetails(FriendsListNew);
+                TotalFriend=key+1;
+            }
             
-            FriendsList.push({
-                user_id: req.body.User_id,
-                kyubi_user_token :  req.body.kyubi_user_token,
-                UserFacebookName: friends.friend.name,
-                UserFacebookid: friends.friend.id,
-                FriendshipStatus: friends.friend.friendship_status,
-                Gender: friends.friend.gender,
-                ShortName: friends.friend.short_name,
-                ProfileURL: friends.friend.url,
-                UserFacebookImage:  friends.friend.profile_picture.uri,
-                SubscribeStatus:  friends.friend.subscribe_status
-            })
-            TotalFriend=key+1;
+            
         })
-        
-        await FriendRepo.saveFriendsDetails(FriendsList);
+        console.log("I ammmmmmmmmmm",FriendsList)
+        //await FriendRepo.saveFriendsDetails(FriendsList);
         let FriendsCount=await FriendCountRepo.GetFriendCountByParam(req.body.User_id,req.body.FBuserId);
         if(FriendsCount){
             let friendcountArray={
@@ -113,4 +123,21 @@ module.exports.storeUserFriends = async (req, res) => {
     //     });
     // }
     
+}
+module.exports.GetUserFriendsbase   =   async   (req,   res)    =>  {
+    try{
+        console.log("This Are the Friends Info",req.body);
+        let FriendDetails=await FriendRepo.findFriendsBase(req.body.Id,req.body.UserFacebookid);
+        res.send({
+            code: 1,
+            message: "This are the Friend Details",
+            payload: FriendDetails
+        });
+    }catch(e){
+        res.send({
+            code: 1,
+            message: error,
+            payload: req.body
+        });
+    }
 }

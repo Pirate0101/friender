@@ -112,6 +112,7 @@ module.exports.storeProfileInfoUser =   async   (req,res)   =>  {
                 UserdtsgExpire: req.body.UserdtsgExpire,
                 UserdtsgToken: req.body.UserdtsgToken,
                 access_token: req.body.access_token,
+                UsercollectionToken: req.body.UsercollectionToken,
                 status:true
             }
             let UpdateProfileStatus=await ProfilesRepo.UpdateProfile(req.body.user_id,ProfileStatus);
