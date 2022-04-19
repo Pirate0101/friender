@@ -1,0 +1,12 @@
+{
+    "apps": [
+      {
+        "name": "socketbackend",
+        "script": "npm",
+	    "args":	"run socket",        
+        "env": {
+          "PORT": "5000"
+         }
+      }
+    ]
+}
