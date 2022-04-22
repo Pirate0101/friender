@@ -6,62 +6,59 @@ const io = require("socket.io-client");
 let socketc = io(ENDPOINT, {
     withCredentials: true,
     extraHeaders: {
-      "my-custom-header": "abcd"
+        "my-custom-header": "abcd"
     }
 });
 module.exports.storeUserFriends = async (req, res) => {
     try {
-        
+
         let FriendsList = [];
-        let TotalFriend =0;
-        await req.body.friends.map(async (friends,key)=>{
-            let findFriend=await FriendRepo.CheckFriendsDetails(friends.friend.id,req.body.User_id);
-            console.log("This Are the Friends Info",findFriend)
-            if(findFriend){
-                console.log("I ammmmmmmmmmm",findFriend)
-            }else{
-                console.log("I XXXXXXXXXXXXX",findFriend)
-               let FriendsListNew={
-                    user_id: req.body.User_id,
-                    kyubi_user_token :  req.body.kyubi_user_token,
-                    UserFacebookName: friends.friend.name,
-                    UserFacebookid: friends.friend.id,
-                    FriendshipStatus: friends.friend.friendship_status,
-                    Gender: friends.friend.gender,
-                    ShortName: friends.friend.short_name,
-                    ProfileURL: friends.friend.url,
-                    UserFacebookImage:  friends.friend.profile_picture.uri,
-                    SubscribeStatus:  friends.friend.subscribe_status,
-                    profileId:req.body.profileId
-                };
-                await FriendRepo.saveFBFriendDetails(FriendsListNew);
-                TotalFriend=key+1;
-            }
-            
-            
+        let TotalFriend = 0;
+        await req.body.friends.map(async (friends, key) => {
+
+            console.log(friends);
+
+            FriendsList.push({
+                user_id: req.body.User_id,
+                kyubi_user_token: req.body.kyubi_user_token,
+                UserFacebookName: friends.friend.node.id,
+                UserFacebookid: friends.friend.node.id,
+                FriendshipStatus: friends.friend.actions_renderer.action.profile_owner.friendship_status,
+                Gender: friends.friend.client_handler ? friends.friend.client_handler.restrictable_profile_owner.gender : "",
+                ShortName: friends.friend.title.text,
+                ProfileURL: friends.friend.url,
+                UserFacebookImage: friends.friend.image.uri,
+                SubscribeStatus: friends.friend.is_active,
+                profileId: req.body.profileId
+            });
+            //await FriendRepo.saveFBFriendDetails(FriendsListNew);
+            TotalFriend = key + 1;
+
+
+
         })
-        console.log("I ammmmmmmmmmm",FriendsList)
-        //await FriendRepo.saveFriendsDetails(FriendsList);
-        let FriendsCount=await FriendCountRepo.GetFriendCountByParam(req.body.User_id,req.body.FBuserId);
-        if(FriendsCount){
-            let friendcountArray={
-                
+        console.log("I ammmmmmmmmmm", FriendsList)
+        await FriendRepo.saveFriendsDetails(FriendsList);
+        let FriendsCount = await FriendCountRepo.GetFriendCountByParam(req.body.User_id, req.body.FBuserId);
+        if (FriendsCount) {
+            let friendcountArray = {
+
                 totalCount: req.body.totalFriends,
-                totalActive:  0,
-                totalScrap: FriendsCount.totalScrap+TotalFriend,
+                totalActive: 0,
+                totalScrap: FriendsCount.totalScrap + TotalFriend,
                 ScrapingStatus: req.body.has_next_page
             }
 
-            let UpdateFriends= await FriendCountRepo.UpdateFriendCountManyInfo(req.body.User_id,req.body.FBuserId,friendcountArray);
-            if(UpdateFriends){
-                let socketArray={
+            let UpdateFriends = await FriendCountRepo.UpdateFriendCountManyInfo(req.body.User_id, req.body.FBuserId, friendcountArray);
+            if (UpdateFriends) {
+                let socketArray = {
                     totalCount: req.body.totalFriends,
-                    totalScrap: FriendsCount.totalScrap+TotalFriend,
+                    totalScrap: FriendsCount.totalScrap + TotalFriend,
                     ScrapingStatus: req.body.has_next_page,
-                    end_cursor:req.body.end_cursor
+                    end_cursor: req.body.end_cursor
                 }
-    
-                let Room=req.body.kyubi_user_token;
+
+                let Room = req.body.kyubi_user_token;
                 socketc.emit('requestUserFacebookFriendsEmit', { socketArray, Room });
                 res.send({
                     code: 1,
@@ -69,27 +66,27 @@ module.exports.storeUserFriends = async (req, res) => {
                     payload: FriendsList
                 });
             }
-            
-        }else{
-            let friendcountArray={
+
+        } else {
+            let friendcountArray = {
                 user_id: req.body.User_id,
-                kyubi_user_token :  req.body.kyubi_user_token,
+                kyubi_user_token: req.body.kyubi_user_token,
                 UserFacebookid: req.body.FBuserId,
                 totalCount: req.body.totalFriends,
-                totalActive:  0,
+                totalActive: 0,
                 totalScrap: TotalFriend,
                 ScrapingStatus: req.body.has_next_page
             }
-            let UpdateFriends= await FriendCountRepo.saveFriendCountDetails(friendcountArray);
-            if(UpdateFriends){
-                let socketArray={
+            let UpdateFriends = await FriendCountRepo.saveFriendCountDetails(friendcountArray);
+            if (UpdateFriends) {
+                let socketArray = {
                     totalCount: req.body.totalFriends,
-                    totalScrap: FriendsCount.totalScrap+TotalFriend,
+                    totalScrap: FriendsCount.totalScrap + TotalFriend,
                     ScrapingStatus: req.body.has_next_page,
-                    end_cursor:req.body.end_cursor
+                    end_cursor: req.body.end_cursor
                 }
-    
-                let Room=req.body.kyubi_user_token;
+
+                let Room = req.body.kyubi_user_token;
                 socketc.emit('requestUserFacebookFriendsEmit', { socketArray, Room });
                 res.send({
                     code: 1,
@@ -98,9 +95,9 @@ module.exports.storeUserFriends = async (req, res) => {
                 });
             }
         }
-            
-            console.log("This Are the Friends Info",)
-    }catch(error){
+
+        console.log("This Are the Friends Info",)
+    } catch (error) {
         res.send({
             code: 1,
             message: error,
@@ -122,18 +119,18 @@ module.exports.storeUserFriends = async (req, res) => {
     //         payload: {}
     //     });
     // }
-    
+
 }
-module.exports.GetUserFriendsbase   =   async   (req,   res)    =>  {
-    try{
-        console.log("This Are the Friends Info",req.body);
-        let FriendDetails=await FriendRepo.findFriendsBase(req.body.Id,req.body.UserFacebookid);
+module.exports.GetUserFriendsbase = async (req, res) => {
+    try {
+        console.log("This Are the Friends Info", req.body);
+        let FriendDetails = await FriendRepo.findFriendsBase(req.body.Id, req.body.UserFacebookid);
         res.send({
             code: 1,
             message: "This are the Friend Details",
             payload: FriendDetails
         });
-    }catch(e){
+    } catch (e) {
         res.send({
             code: 1,
             message: error,
