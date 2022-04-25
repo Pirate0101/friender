@@ -5,6 +5,7 @@ import ProtectedRoute from './component/Middlewares/protectedRoute'
 import UnProtectedRoute from './component/Middlewares/unProtectedRoute'
 import DefaultLayout from './component/Layout/defaultlayout';
 import MainLayout from "./component/Layout/mainlayout";
+
 //import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import './App.css';
 function App() {
@@ -17,7 +18,7 @@ function App() {
           <UnProtectedRoute exact path="/forgetpassword" datasection="forgetpassword" component={DefaultLayout} />
           <UnProtectedRoute exact path="/updatepassword" datasection="updatepassword" component={DefaultLayout} />
           <UnProtectedRoute exact path="/setpermissionsection/" datasection="setpermissionsection" component={DefaultLayout} />
-          <ProtectedRoute exact path="/dashboard" datasection="dashboard" component={MainLayout} />
+          <ProtectedRoute exact path="/dashboard" datasection="dashboard" />
 
         </Switch>
       </Router>

@@ -19,7 +19,7 @@ class MainLayout extends Component {
 * in here we are loading our component based on the route
 */
 componentDidMount(){
-    console.log(this.props.datasection);
+    console.log(this.props);
     
 }
   render() { 

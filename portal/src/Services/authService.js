@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { host,kyubi,kyubiloginURL } from '../config'
+import { host,kyubiloginURL } from '../config'
 import jsonwebtoken from 'jsonwebtoken'
 
 

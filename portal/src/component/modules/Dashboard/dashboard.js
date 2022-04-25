@@ -1,5 +1,7 @@
 
 import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { updateUserDetails,  updateUserProfiles } from "../../../redux/actions";
 import { Panel,Steps,Button, ButtonGroup } from 'rsuite';
 import GearIcon from '@rsuite/icons/Gear';
 import PeoplesUploadedIcon from '@rsuite/icons/PeoplesUploaded';

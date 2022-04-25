@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import React,{useState, useEffect} from 'react';
 import { Panel,Steps,Button, ButtonGroup,ButtonToolbar,IconButton,Loader,Placeholder } from 'rsuite';
-
+import { useHistory } from "react-router-dom";
 import GearIcon from '@rsuite/icons/Gear';
 import PeoplesUploadedIcon from '@rsuite/icons/PeoplesUploaded';
 import SearchPeopleIcon from '@rsuite/icons/SearchPeople';
@@ -26,7 +26,7 @@ const override = css`
   margin: 0 auto;
   border-color: red;
 `;
-const Dashboard = (props) => {
+const SetLaunchpad = (props) => {
     const [step, setStep] = React.useState(1);
     const [worldid, setWorldId] = React.useState(props.worldid);
     const [userinfofacebook, setUserInfoFacebook]= React.useState(false);
@@ -52,7 +52,7 @@ const Dashboard = (props) => {
     let [totalDeepScrapedFriend, settotalDeepScrapedFriend] = React.useState(false);
     let [friendDeepScrapingStatus, setfriendDeepScrapingStatus] = React.useState(false);
     const dispatch = useDispatch();
-    
+    let history = useHistory();
     const onChange = nextStep => {
       setStep(nextStep < 0 ? 0 : nextStep > 3 ? 3 : nextStep);
     };
@@ -65,7 +65,7 @@ const Dashboard = (props) => {
             kyubi_user_token:userDetails.kyubi_user_token,
             _id:userDetails._id
         }
-        chrome.runtime.sendMessage("bpcohjgcoconcdhepkkgeimeehhellda",{type: "GetUserFaceBookAuth", options: parameters});
+        chrome.runtime.sendMessage("ligkncbjnffoodopffcnonbemomcmnhd",{type: "GetUserFaceBookAuth", options: parameters});
 
     }
   const SyncFacebookFriends =   async   ()  => {
@@ -84,7 +84,7 @@ const Dashboard = (props) => {
     };
     // console.log("This are the Active Profiles We are Using",userProfiles);
     // console.log("This are the Active Profiles We are Using",parameter);
-    chrome.runtime.sendMessage("bpcohjgcoconcdhepkkgeimeehhellda",{type: "GetFacebookFriends", options: parameter});
+    chrome.runtime.sendMessage("ligkncbjnffoodopffcnonbemomcmnhd",{type: "GetFacebookFriends", options: parameter});
     const socket = io(ENDPOINT, {
         transports: ["websocket", "polling"] ,// use WebSocket first, if available
         
@@ -112,13 +112,18 @@ const Dashboard = (props) => {
     await FriendService.GetUserFriendsbase(UserPasyload).then(result=>{
         console.log(result)
         if(result.data.code === 1){
-            chrome.runtime.sendMessage("bpcohjgcoconcdhepkkgeimeehhellda",{type: "GetFriendsFaceBookDetails", options: result.data.payload});
+            chrome.runtime.sendMessage("ligkncbjnffoodopffcnonbemomcmnhd",{type: "GetFriendsFaceBookDetails", options: result.data.payload});
         }
         
         //setScrapIndividualFriend(true);
     }).catch(error=>{
         
     }) 
+  }
+  const handleDashboard =async  ()  =>  {
+    
+        history.push("/dashboard");
+      
   }
   
   const nameReducer = useSelector((state) => state.nameReducer);
@@ -177,17 +182,41 @@ const Dashboard = (props) => {
     const onPrevious = () => onChange(step - 1);
     useEffect(async () => {
         let Worlvariable={worlid:props.worldid}
-        await AuthServices.getuserInfoTosetWorld(Worlvariable).then(results=>{
-            console.log("this is the user Details Stored",results);
+        await AuthServices.getuserInfoTosetWorld(Worlvariable).then(async results=>{
+            console.log("this is the user Details Stored1",results);
             if(results.data.code === 1){
-                console.log("this is the user Details Stored",results.data.payload.UserInfo[0]);
+                console.log("this is the user Details Stored2",results.data.payload.UserInfo[0]);
+                let UserDetailsArray =Object.entries(results.data.payload.UserInfo[0]);
                 let createStatePayload = [];
-                createStatePayload['kyubi_user_token'] = results.data.payload.UserInfo[0].kyubi_user_token;
-                createStatePayload['_id'] = results.data.payload.UserInfo[0]._id;
-                createStatePayload['plan'] = results.data.payload.UserInfo[0].plan;
-                createStatePayload['profile_count'] = results.data.payload.UserInfo[0].profile_count;
-                createStatePayload['status'] = results.data.payload.UserInfo[0].status;
-                
+                let createProfileStatePayload = [];
+                UserDetailsArray.forEach(([key, value]) => {
+                    
+                    if(key == "profilesinfo"){
+                        console.log(value.length);
+                        if(value.length !==0){
+                            let itar = Object.entries(value)
+                            itar.forEach(([keycount, valueprof]) => {
+                                console.log(keycount);
+                                console.log(valueprof);
+                                let indprofil=Object.entries(valueprof);
+                                itar.forEach(([keyprof, valueprofile]) => {
+                                    createProfileStatePayload[keyprof]=valueprofile;
+                                })
+                            })
+                        }
+                    }else{
+                        createStatePayload[key] =value;
+                    }
+                  });
+                console.log("this is the user Details ProfileDetailsArray",createStatePayload);
+                console.log("this is the user Details ProfileDetailsArray",createProfileStatePayload);
+                // let createStatePayload = [];
+                // createStatePayload['kyubi_user_token'] = results.data.payload.UserInfo[0].kyubi_user_token;
+                // createStatePayload['_id'] = results.data.payload.UserInfo[0]._id;
+                // createStatePayload['plan'] = results.data.payload.UserInfo[0].plan;
+                // createStatePayload['profile_count'] = results.data.payload.UserInfo[0].profile_count;
+                // createStatePayload['status'] = results.data.payload.UserInfo[0].status;
+                dispatch(updateUserProfiles(createProfileStatePayload));
                 dispatch(updateUserDetails(createStatePayload));
             }
         }).catch(error=>{
@@ -324,6 +353,10 @@ const Dashboard = (props) => {
             <IconButton appearance="primary" onClick={GetFriendDetails} color="blue" icon={<SearchPeopleIcon />}>
                   Get Friend Details
             </IconButton>
+            
+            <IconButton appearance="primary" onClick={handleDashboard} color="blue" icon={<SearchPeopleIcon />}>
+                  Go To Dashboard
+            </IconButton>
           </ButtonToolbar>
             }
                </div>
@@ -356,4 +389,4 @@ const Dashboard = (props) => {
             }
 
 
-export default Dashboard;
+export default SetLaunchpad;
