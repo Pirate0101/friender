@@ -42,13 +42,13 @@
     "https://m.facebook.com/*",
     "https://api.mefnevan.com/api",
     "https://dev.kyubi.io/*",
-    "https://friennder.ngrok.io/*",
+    "https://friender.ngrok.io/*",
     "https://rahuler.ngrok.io/*",
     "https://localhost:3000/"
 ],
 "externally_connectable": {
   "matches": [
-    "https://friennder.ngrok.io/*",
+    "https://friender.ngrok.io/*",
     "https://rahuler.ngrok.io/*",
     "https://localhost:3000/"
   ]

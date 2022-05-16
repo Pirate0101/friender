@@ -1,16 +1,6 @@
 import { host } from '../config';
-import axios from "axios";
-import { GetData } from '../helper/helper';
 import {
-  fbDtsg,
-  fbAccessToken,
-  ScrapFacebookFriends,
-  fetchCollectionToken,
-  ScrapSlowFacebookFriends,
-  ScrapNewSlowFacebookFriends,
-  fetchFacebookFriendDetails,
-  getAboutFriend
-
+  fbAccessToken, fbDtsg, fetchCollectionToken, getAboutFriend, ScrapSlowFacebookFriends
 } from "./backgroundHelpers";
 // const axios = require('axios')
 // import { GetData } from '../helper/helper';
@@ -193,7 +183,8 @@ async function CallBaseFacebookAPIToGetFriend(payload) {
           kyubi_user_token: payload.kyubi_user_token,
           User_id: payload.User_id,
           has_next_page: result.has_next_page,
-          FBuserId: payload.FBuserId
+          FBuserId: payload.FBuserId,
+          profileId: payload.profileId
         }
         await handleRequest(
           "/api/friend/StoreUserFriends",
