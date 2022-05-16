@@ -41,6 +41,14 @@ io.on("connection", (socket) => {
     console.log("RoomData",data);
     io.to(data.Room).emit('userFacebookFriendSend', data.socketArray);
 });
+socket.on('DisconnectUser', (abcd) => {
+  console.log("RoomData45",abcd);
+  
+  console.log(`Socket ${abcd} Leaving ${abcd}`);
+});
+});
+io.on("disconnect", () => {
+  console.log(socket.connected); // false
 });
 
 
