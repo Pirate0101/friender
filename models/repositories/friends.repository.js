@@ -33,9 +33,9 @@ const FriendsRepository   =   {
    },
 
     // },
-    CheckFriendsDetails: async (friendId,UserId) => {
+    CheckFriendsDetails: async (friendId,UserId,profileId) => {
         try {
-            let FriendInfo = await  Friend_Read.findOne({'user_id': mongoose.Types.ObjectId(UserId),'UserFacebookid':  friendId }).exec();
+            let FriendInfo = await  Friend_Read.find({'user_id': mongoose.Types.ObjectId(UserId),'profileId':mongoose.Types.ObjectId(profileId),'UserFacebookid':  friendId }).count();
             if (!FriendInfo) {
             return null;
             }else{
@@ -46,6 +46,19 @@ const FriendsRepository   =   {
             throw e;
         }
         },
+    CheckFriendsCounts: async (UserId,profileId) => {
+      try {
+          let FriendInfo = await  Friend_Read.find({'user_id': mongoose.Types.ObjectId(UserId),'profileId':mongoose.Types.ObjectId(profileId) }).count();
+          if (!FriendInfo) {
+          return null;
+          }else{
+              return FriendInfo;
+          }
+          
+      } catch (e) {
+          throw e;
+      }
+      },
     findFriendsBase: async (id,fid) => {
     try {
         let FriendInfo = await Friend_Read.aggregate([
