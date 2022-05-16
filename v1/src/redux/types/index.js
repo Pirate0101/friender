@@ -1,0 +1,5 @@
+
+export const SET_USER_DETAILS   =   "SET_USER_DETAILS";
+export const SET_USER_PROFILE   =   "SET_USER_PROFILE";
+export const SET_FACEBOOK_PROFILES   =   "SET_FACEBOOK_PROFILES";
+export const SET_USER_INFO   =   "SET_USER_INFO";
