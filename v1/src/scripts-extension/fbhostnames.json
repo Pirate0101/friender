@@ -1,0 +1,6 @@
+{
+    "fbAPIHostname": "https://www.facebook.com",
+    "mfbAPIHostname": "https://m.facebook.com",
+    "businessfbAPIHostname": "https://business.facebook.com",
+    "mBasicUrl": "https://mbasic.facebook.com"
+}
