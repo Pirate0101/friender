@@ -5,6 +5,8 @@ import io from "socket.io-client";
 import Card, { CardBody, CardHeader, CardLabel, CardTitle } from '../../../components/bootstrap/Card';
 import Spinner from '../../../components/bootstrap/Spinner';
 import Icon from '../../../components/icon/Icon';
+import { updateFaceBookProfile, updateUserProfiles } from "../../../redux/actions";
+import ProfileService from '../../../Services/profileServices';
 import ConnectFooter from './connect-footer';
 import ProfileDetail from './profile-detail';
 const Profile = (props)=>{
@@ -86,14 +88,66 @@ const Profile = (props)=>{
         }
 	};
     const  storeProfileInfo= async ( profileInfoStore)=>{
-        let px=localStorage.getItem("FacebookProfiles");
-        console.log("8888888",px)
+        let cacheProfile=JSON.parse(localStorage.getItem("FacebookProfilesCache"));
+
+        
+        setProfileSectionState({
+            ...profilesectionstate,
+            headerText:"Please wait We are storing Your Profile Info",
+            mainClass:"secondary",
+            borderColor:"secondary",
+            footerState:false,
+            footerContent:"",
+            bodySilentContent:"",
+            bodyContent:<Spinner
+            tag={ 'span' } // 'div' || 'span'
+            color={ 'secondary' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'            
+            size={ '10rem' } // Example: 10, '3vh', '5rem' etc.
+             />
+        })
+        
+        console.log("8888888",cacheProfile);
+        await ProfileService.StoreUserFacebookProfile(cacheProfile).then(async results=>{
+			if(results.data.code === 1){
+					let createStatePayload = [];
+                    createStatePayload['kyubi_user_token'] = results.data.payload[0].kyubi_user_token;
+                    createStatePayload['_id'] = results.data.payload[0]._id;
+                    createStatePayload['plan'] = results.data.payload[0].plan;
+                    createStatePayload['profile_count'] = results.data.payload[0].profile_count;
+                    createStatePayload['status'] = results.data.payload[0].status;
+					let ProfileDet=results.data.payload[0].profilesinfo;
+                    let ProfileArray=new Array();
+					let eachProfileData=new Array();
+                    await ProfileDet.map(async (eachProfile,key)=>{
+                       //let IndividualProfile=Object.entries(eachProfile);
+                        eachProfileData.push(eachProfile)
+                        if(eachProfile.status === true){
+                            ProfileArray=eachProfile;
+                        }                        
+                    })            
+					console.log("This are Total Number Of Profile We are Using   91",ProfileArray)  
+					console.log("This are Total Number Of Profile We are Using   92",eachProfileData)   
+					           
+                    dispatch(updateUserProfiles(ProfileArray));
+                    localStorage.setItem("Profile",JSON.stringify(ProfileArray));
+                    dispatch(updateFaceBookProfile(eachProfileData));
+                    let Pfe=JSON.parse(localStorage.getItem("FacebookProfilesCache"));
+                    console.log("This are Total Number Of Profile We are Using   134",Pfe)   
+                    
+                    props.onStoringFaceBookData(true)
+					
+			}
+		}).catch(error=>{
+            console.log(error)
+
+		})
     }
 
     
     useEffect(()=>{
         
         if(props.sectionstate===0){
+
             setProfileSectionState({
                 ...profilesectionstate,
                 headerText:"Connect Your Facebook Profile With Friender To Procceed !!!!",
@@ -107,7 +161,20 @@ const Profile = (props)=>{
                 footerButtonText:"Connect"
             })
         }
-    },[userDetails])
+        if(props.sectionstate ===2){
+            let ProfileData=JSON.parse(localStorage.getItem("Profile"));
+            setProfileSectionState({
+                ...profilesectionstate,
+                headerText:"Hi "+ProfileData.UserFacebookName,
+                mainClass:"success",
+                borderColor:"success",
+                footerState:false,
+                footerContent:"",
+                bodySilentContent:"",
+                bodyContent:<ProfileDetail profileInfo={ProfileData}/>
+            })
+        }
+    },[userDetails,props])
     console.log(props)
 return (
     <Card    className={`bg-l-${profilesectionstate.mainClass} bg-l-${profilesectionstate.mainClass}-hover`}	shadow={ '3d' } 	borderSize={ 1 } 	borderColor={ profilesectionstate.borderColor} 	>

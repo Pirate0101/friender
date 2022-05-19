@@ -11,8 +11,8 @@ import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import { layoutMenu } from '../../../menu';
 import { updateUserDetails, updateUserInfo } from "../../../redux/actions";
 import AuthServices from "../../../Services/authService";
+import Friendsync from '../friend-sync/friend';
 import Profile from '../profile-card/profile';
-
 const Blank = (props) => {
 	
 	const {id} = useParams()
@@ -42,10 +42,26 @@ const Blank = (props) => {
                 dispatch(updateUserDetails(createStatePayload));
 			}
 		})
+		if(localStorage.getItem("Profile")){
+			// let ProfileData=JSON.parse(localStorage.getItem("Profile"));
+			setSectionState({...sectionstate,
+				profileState:2,
+				friendsState:1
+			})
+		}
+		
+
 		  
 		}
 		fetchUserData();
 	  }, [id]); 
+	const  StoreFaceBookData =async (isProfiledataStored) => {
+		console.log("This is It",isProfiledataStored);
+		setSectionState({...sectionstate,
+			profileState:2,
+			friendsState:1
+		})
+	  }
 	return (
 		<PageWrapper title={layoutMenu.setWorld.text}>
 			<Page>
@@ -70,10 +86,10 @@ const Blank = (props) => {
 							<CardBody>
 								<div className='row g-4'>
 									<div className='col-md-6'>
-										<Profile sectionstate={sectionstate.profileState}/>
+										<Profile sectionstate={sectionstate.profileState} onStoringFaceBookData={StoreFaceBookData} />
 									</div>
 									<div className='col-md-6'>
-										
+									     <Friendsync sectionstate={sectionstate.friendsState}  />
 									</div>
 								</div>
 							</CardBody>

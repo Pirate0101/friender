@@ -23,7 +23,7 @@ const ConfirmFacebookAccounts = () =>{
             </CardFooterRight>
             {props.confirmButton && (
                 <CardFooterLeft>
-<Button	icon= "PersonAdd" onClick={ConfirmFacebookAccounts}  className="btn btn-lg btn-hover-shadow-lg btn-light-info shadow-none">Confirm</Button>
+                        <Button	icon= "PersonAdd" onClick={ConfirmFacebookAccounts}  className="btn btn-lg btn-hover-shadow-lg btn-light-info shadow-none">Confirm</Button>
                 </CardFooterLeft>
             )}
             
