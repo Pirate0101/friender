@@ -48,7 +48,7 @@ const FriendsRepository   =   {
         },
     CheckFriendsCounts: async (UserId,profileId) => {
       try {
-          let FriendInfo = await  Friend_Read.find({'user_id': mongoose.Types.ObjectId(UserId),'profileId':mongoose.Types.ObjectId(profileId) }).count();
+          let FriendInfo = await  Friend_Read.find({'user_id': mongoose.Types.ObjectId(profileId),'profileId':mongoose.Types.ObjectId(profileId) }).countDocuments();
           if (!FriendInfo) {
           return null;
           }else{

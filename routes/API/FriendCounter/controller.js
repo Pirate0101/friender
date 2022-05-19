@@ -20,6 +20,7 @@ module.exports.saveOrUpdate = async (req, res) => {
 },
 module.exports.GetAndSetUserFriendsCounts = async (req, res) => {
     try{
+        console.log(req.body);
     let FriendsCount = await FriendCountRepo.GetFriendCountByParam(req.body.User_id, req.body.FBuserId);
     let existingFriendsCount=await FriendRepo.CheckFriendsCounts(req.body.User_id,req.body.profileId);
     console.log("This Are the Friend Count Table",FriendsCount)
