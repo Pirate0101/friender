@@ -1,11 +1,11 @@
-import { SET_FIRST_NAME, SET_LAST_NAME,SET_USER_DETAILS, SET_USER_PROFILE  } from "../types";
+import { SET_FACEBOOK_PROFILES, SET_USER_DETAILS, SET_USER_INFO, SET_USER_PROFILE } from "../types";
 
 const INITIAL_STATE = {
-  firstName: "John",
-  lastName: "Doe",
   message: "",
   userDetails:[],
-  userProfiles:[]
+  userProfiles:[],
+  userInfo:[],
+  facebookProfiles:[]
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -16,6 +16,16 @@ export default (state = INITIAL_STATE, action) => {
         ...action.payload,
       };
     case SET_USER_PROFILE:
+      return {
+        ...state,
+        ...action.payload,
+      };
+    case SET_USER_INFO:
+      return {
+        ...state,
+        ...action.payload,
+      };
+    case SET_FACEBOOK_PROFILES:
       return {
         ...state,
         ...action.payload,

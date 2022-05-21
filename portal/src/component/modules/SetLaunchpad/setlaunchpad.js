@@ -1,251 +1,72 @@
 /* eslint-disable no-undef */
-import React,{useState, useEffect} from 'react';
-import { Panel,Steps,Button, ButtonGroup,ButtonToolbar,IconButton,Loader,Placeholder } from 'rsuite';
-import { useHistory } from "react-router-dom";
 import GearIcon from '@rsuite/icons/Gear';
-import PeoplesUploadedIcon from '@rsuite/icons/PeoplesUploaded';
-import SearchPeopleIcon from '@rsuite/icons/SearchPeople';
 import PeopleFliterIcon from '@rsuite/icons/PeopleFliter';
+import PeoplesUploadedIcon from '@rsuite/icons/PeoplesUploaded';
 import UserInfoIcon from '@rsuite/icons/UserInfo';
-import "rsuite/dist/rsuite.min.css";
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from "react-redux";
-import { updateUserDetails,  updateUserProfiles } from "../../../redux/actions";
-import Logo from "../../../images/logo.svg";
+import { useParams } from 'react-router-dom';
+import { Button, ButtonGroup, Panel, Steps } from 'rsuite';
+import "rsuite/dist/rsuite.min.css";
+import { updateUserDetails } from "../../../redux/actions";
 import AuthServices from "../../../Services/authService";
-import ProfileService from '../../../Services/profileServices';
-import FriendService from '../../../Services/friendServices';
-import io from "socket.io-client";
-import { socketUrl } from '../../../config';
-import ProfileCard from './profilecard';
-import { css } from "@emotion/react";
-import ClipLoader from "react-spinners/ClipLoader";
-import BounceLoader from "react-spinners/BounceLoader";
-const ENDPOINT = socketUrl;
-const override = css`
-  display: block;
-  margin: 0 auto;
-  border-color: red;
-`;
+import ProfileGraber from './profileGraber';
+
 const SetLaunchpad = (props) => {
-    const [step, setStep] = React.useState(1);
-    const [worldid, setWorldId] = React.useState(props.worldid);
-    const [userinfofacebook, setUserInfoFacebook]= React.useState(false);
-    const [profilevalues, setProfileValues] = React.useState({
-                                                        UserFacebookImage: "",
-                                                        UserFacebookName: "",
-                                                        UserFacebookUsername: "",
-                                                        UserFacebookid: "",
-                                                        UserdtsgExpire: "",
-                                                        UserdtsgToken: "",
-                                                        access_token: "",
-                                                        kyubi_user_token: "",
-                                                        collectionToken:"",
-                                                        user_id:""
-                                                        });
-    const [workloader,setWorkLoader]=React.useState(false);
-    let [loading, setLoading] = React.useState(false);
-    let [totalScrapedFriend, setTotalScrapedFriend] = React.useState(0);
-    let [friendScrapingStatus, setFriendScrapingStatus] = React.useState("Initiated");
-    let [scrapingStatus, setScrapingStatus] = React.useState(false);
-    let [scrapIndividualFriend, setScrapIndividualFriend] = React.useState(false);
-    let [color, setColor] = useState("#ffffff");
-    let [totalDeepScrapedFriend, settotalDeepScrapedFriend] = React.useState(false);
-    let [friendDeepScrapingStatus, setfriendDeepScrapingStatus] = React.useState(false);
-    const dispatch = useDispatch();
-    let history = useHistory();
+    const {id} = useParams()
+    const [step, setStep] = useState(0);
+    const [sectionstate,setSectionState]=useState({
+		profileState:0,
+		friendsState:0,
+		syncState:0,
+		activityState:0
+	})
+    
     const onChange = nextStep => {
       setStep(nextStep < 0 ? 0 : nextStep > 3 ? 3 : nextStep);
     };
-
-    const ConnectFacebookAccounts = async   ()  =>  {
-        console.log("Helloooooo",worldid);
-        //console.log("Helloooooo",props);
-        setWorkLoader(true);
-        let parameters={
-            kyubi_user_token:userDetails.kyubi_user_token,
-            _id:userDetails._id
-        }
-        chrome.runtime.sendMessage("ligkncbjnffoodopffcnonbemomcmnhd",{type: "GetUserFaceBookAuth", options: parameters});
-
-    }
-  const SyncFacebookFriends =   async   ()  => {
-    setLoading(true)
-    let parameter={
-        kyubi_user_token    :   userDetails.kyubi_user_token,
-        _id :   userDetails._id,
-        UserFacebookid  :   userProfiles.UserFacebookid,
-        UserdtsgToken   :   userProfiles.UserdtsgToken,
-        access_token    :   userProfiles.access_token,
-        UserFacebookUsername    :   userProfiles.UserFacebookUsername,
-        UsercollectionToken :   userProfiles.UsercollectionToken,
-        UserProfileId   : userProfiles.id,
-        end_cursor : ""
-        
-    };
-    // console.log("This are the Active Profiles We are Using",userProfiles);
-    // console.log("This are the Active Profiles We are Using",parameter);
-    chrome.runtime.sendMessage("ligkncbjnffoodopffcnonbemomcmnhd",{type: "GetFacebookFriends", options: parameter});
-    const socket = io(ENDPOINT, {
-        transports: ["websocket", "polling"] ,// use WebSocket first, if available
-        
-    });
-    socket.emit('join', userDetails.kyubi_user_token);
-    socket.on('userFacebookFriendSend', async message => {
-        console.log("This are the Friends Innnnnnnnnnnnnnn",message);
-        setTotalScrapedFriend(message.totalScrap);
-        setScrapingStatus(message.ScrapingStatus);
-        if(message.ScrapingStatus){
-            setFriendScrapingStatus("Prcessing");
-        }else{
-            setFriendScrapingStatus("Done");
-            
-            
-        }
-    });
-  }
-  const GetFriendDetails = async    ()  =>  {
-      console.log("Hi We ARe Here")
-    let UserPasyload = {
-        Id :   userDetails._id,
-        UserFacebookid  :   userProfiles.id
-    };
-    await FriendService.GetUserFriendsbase(UserPasyload).then(result=>{
-        console.log(result)
-        if(result.data.code === 1){
-            chrome.runtime.sendMessage("ligkncbjnffoodopffcnonbemomcmnhd",{type: "GetFriendsFaceBookDetails", options: result.data.payload});
-        }
-        
-        //setScrapIndividualFriend(true);
-    }).catch(error=>{
-        
-    }) 
-  }
-  const handleDashboard =async  ()  =>  {
-    
-        history.push("/dashboard");
-      
-  }
-  
-  const nameReducer = useSelector((state) => state.nameReducer);
-  const {  message, userDetails,userProfiles } = nameReducer;
-
- 
-    const onNext = async () => { 
-        if(step+1 ===2){
-            console.log("This are the ino we save in DB",profilevalues)
-            await ProfileService.StoreUserFacebookProfile(profilevalues).then(async results=>{
-                
+    const  StoreFaceBookData =async (isProfiledataStored) => {
+		console.log("This is It",isProfiledataStored);
+		setSectionState({...sectionstate,
+			profileState:2,
+			friendsState:1
+		});
+        onChange(step + 1);
+	}
+    const dispatch = useDispatch();
+	const nameReducer = useSelector((state) => state.nameReducer);
+	const {  userDetails,userProfiles,userInfo,facebookProfiles } = nameReducer;
+    useEffect(() => {
+        async function fetchUserData() {
+            console.log("this is the user Details Stored",props.worldid);
+            let Worlvariable={worlid:props.worldid}
+            await AuthServices.getuserInfoTosetWorld(Worlvariable).then(async results=>{
+                console.log("this is the user Details Stored",results);
                 if(results.data.code === 1){
-                    console.log(results)
+                    console.log("this is the user Details Stored",results.data.payload.UserInfo[0]);
                     let createStatePayload = [];
-                    createStatePayload['kyubi_user_token'] = results.data.payload[0].kyubi_user_token;
-                    createStatePayload['_id'] = results.data.payload[0]._id;
-                    createStatePayload['plan'] = results.data.payload[0].plan;
-                    createStatePayload['profile_count'] = results.data.payload[0].profile_count;
-                    createStatePayload['status'] = results.data.payload[0].status;
-                    console.log("This are the User info we save in Redux",createStatePayload)
-                    let ProfileDet=results.data.payload[0].profilesinfo;
-                    console.log("This are Total Number Of Profile We are Using",ProfileDet)
-                    let ProfileArray=[]
-                    await ProfileDet.map(async (eachProfile,key)=>{
-                        //console.log("This are key",key)
-                        if(eachProfile.status===true){
-                            ProfileArray['id']=eachProfile._id;
-                            ProfileArray['user_id']=eachProfile.user_id;
-                            ProfileArray['status']=eachProfile.status;
-                            ProfileArray['kyubi_user_token']=eachProfile.kyubi_user_token;
-                            ProfileArray['access_token']=eachProfile.access_token;
-                            ProfileArray['UserdtsgToken']=eachProfile.UserdtsgToken;
-                            ProfileArray['UserdtsgExpire']=eachProfile.UserdtsgExpire;
-                            ProfileArray['UserFacebookid']=eachProfile.UserFacebookid;
-                            ProfileArray['UserFacebookUsername']=eachProfile.UserFacebookUsername;
-                            ProfileArray['UserFacebookName']=eachProfile.UserFacebookName;
-                            ProfileArray['UserFacebookImage']=eachProfile.UserFacebookImage;
-                            ProfileArray['UsercollectionToken']=eachProfile.UsercollectionToken;
-                            dispatch(updateUserProfiles(ProfileArray));
-                        }
-                        
-                        
-                    })
-                    console.log("This are Total Number Of Profile We are Using=====",ProfileArray)
+                    createStatePayload['kyubi_user_token'] = results.data.payload.UserInfo[0].kyubi_user_token;
+                    createStatePayload['_id'] = results.data.payload.UserInfo[0]._id;
+                    createStatePayload['plan'] = results.data.payload.UserInfo[0].plan;
+                    createStatePayload['profile_count'] = results.data.payload.UserInfo[0].profile_count;
+                    createStatePayload['status'] = results.data.payload.UserInfo[0].status;
                     
-                    await onChange(step + 1); 
-                    
+                    dispatch(updateUserDetails(createStatePayload));
                 }
-            }).catch(error=>{
-
             })
-        }else{
-            onChange(step + 1); 
-        }
-    }
-    const onPrevious = () => onChange(step - 1);
-    useEffect(async () => {
-        let Worlvariable={worlid:props.worldid}
-        await AuthServices.getuserInfoTosetWorld(Worlvariable).then(async results=>{
-            console.log("this is the user Details Stored1",results);
-            if(results.data.code === 1){
-                console.log("this is the user Details Stored2",results.data.payload.UserInfo[0]);
-                let UserDetailsArray =Object.entries(results.data.payload.UserInfo[0]);
-                let createStatePayload = [];
-                let createProfileStatePayload = [];
-                UserDetailsArray.forEach(([key, value]) => {
-                    
-                    if(key == "profilesinfo"){
-                        console.log(value.length);
-                        if(value.length !==0){
-                            let itar = Object.entries(value)
-                            itar.forEach(([keycount, valueprof]) => {
-                                console.log(keycount);
-                                console.log(valueprof);
-                                let indprofil=Object.entries(valueprof);
-                                itar.forEach(([keyprof, valueprofile]) => {
-                                    createProfileStatePayload[keyprof]=valueprofile;
-                                })
-                            })
-                        }
-                    }else{
-                        createStatePayload[key] =value;
-                    }
-                  });
-                console.log("this is the user Details ProfileDetailsArray",createStatePayload);
-                console.log("this is the user Details ProfileDetailsArray",createProfileStatePayload);
-                // let createStatePayload = [];
-                // createStatePayload['kyubi_user_token'] = results.data.payload.UserInfo[0].kyubi_user_token;
-                // createStatePayload['_id'] = results.data.payload.UserInfo[0]._id;
-                // createStatePayload['plan'] = results.data.payload.UserInfo[0].plan;
-                // createStatePayload['profile_count'] = results.data.payload.UserInfo[0].profile_count;
-                // createStatePayload['status'] = results.data.payload.UserInfo[0].status;
-                dispatch(updateUserProfiles(createProfileStatePayload));
-                dispatch(updateUserDetails(createStatePayload));
-            }
-        }).catch(error=>{
-            console.log("this is the error",error);
-        });
-    },[props.worldid])
-    useEffect(async ()=>{
-        if(userDetails.kyubi_user_token){
-            const socket = io(ENDPOINT, {
-                transports: ["websocket", "polling"] ,// use WebSocket first, if available
-                
-            });
-            socket.emit('join', userDetails.kyubi_user_token);
-            socket.on('userFacebookInfoSend', message => {
-                setUserInfoFacebook(true);
-                let NewProfileValue={};
-                let merged = {};
-                Object.keys(message).map(item => {
-                     merged ={...merged,[item]: message[item]}
-                   
+            if(localStorage.getItem("Profile")){
+                // let ProfileData=JSON.parse(localStorage.getItem("Profile"));
+                setSectionState({...sectionstate,
+                    profileState:2,
+                    friendsState:1
                 })
-                
-                setProfileValues(merged);
-                setWorkLoader(false);
-            })
+            }
         }
-        
-    })
-    console.log("",userDetails.kyubi_user_token);
+        fetchUserData();
+    },[props.worldid])
+  
+    const onNext = () => onChange(step + 1);
+    const onPrevious = () => onChange(step - 1);
         return (
                 
                 <div className="container-fluid page-body-wrapper full-page-wrapper">
@@ -253,9 +74,7 @@ const SetLaunchpad = (props) => {
                         <div className="row flex-grow">
                         <div className="col-lg-12 mx-auto">
                             <div className="auth-form-light text-left p-5">
-                            <div className="brand-logo">
-                                <img src={Logo}/>
-                            </div>
+                            
                             <h4>Hello! let's get started</h4>
                             
                     <Steps current={step}>
@@ -267,105 +86,19 @@ const SetLaunchpad = (props) => {
                     </Steps>
                     <hr />
                     <Panel header={`Step: ${step + 1}`}>
-                    {(() => {
+                        {step}
+                        {(() => {
         switch(step) {
         case 0:
-          return "Please Connect Your Extension"
+          return <ProfileGraber sectionstate={sectionstate.profileState} onStoringFaceBookData={StoreFaceBookData} />
         case 1:
-            return (
-                <div>
-                { workloader ?
-                  <Panel bordered>
-                  <Loader  center content="loading...." />
-                </Panel>
-                     
-                  
-               
-                :
-                
-                <ButtonToolbar>
-                    {(userinfofacebook) ? 
-                    <div>
-                    <ProfileCard UserProfileInfoDetails={profilevalues}/> 
-                    </div>
-                    : 
-                    <h1>Please Connect Your FaceBook Account</h1>
-                    }
-                <IconButton appearance="primary" onClick={ConnectFacebookAccounts} color="blue" icon={<UserInfoIcon />}>
-                  Connect Facebook Account
-                </IconButton>
-
-                {(profilevalues.UserdtsgToken) ?
-                <Button onClick={onNext} disabled={step === 3}>
-                Next
-                </Button>
-                :
-                ""
-                }
-              </ButtonToolbar>
-            }
-
-                </div>
-            
-                
-              )
+            return "Please Annalyse Your Friends2"
         case 2:
-           return (
-               <div>
-                    { loading 
-                ?
-                <div className="sweet-loading">
-               
-                        <Panel header="We are Syncking all your Friends from Facebook Please Be Patient " shaded>
-                            <ClipLoader color={color} loading={loading} css={override} size={150} />
-                            <dl>
-                                <dt>Total Friend Scraped:</dt>
-                                <dd>{totalScrapedFriend}</dd>
-                                <dt>Scraping Status:</dt>
-                                <dd>{friendScrapingStatus}</dd>
-                            </dl>
-                        </Panel>
-                        
-                       
-                        
-                </div>
-    :
-            <ButtonToolbar>
-                <h1>Please Sync Your FaceBook Friends</h1>
-                {scrapingStatus ?
-                <Panel header="We are Syncking all your Friends from Facebook Please Be Patient " shaded>
-                <ClipLoader color={color} loading={loading} css={override} size={150} />
-                <dl>
-                <dt>Total Friend Scraped:</dt>
-                <dd>{totalScrapedFriend}</dd>
-                <dt>Scraping Status:</dt>
-                <dd>{friendScrapingStatus}</dd>
-
-                </dl>
-            </Panel>
-                :
-                ""
-                }
-                
-            <IconButton appearance="primary"  onClick={SyncFacebookFriends} color="blue" icon={<PeoplesUploadedIcon />}>
-              Sync Friends
-            </IconButton>
-            <IconButton appearance="primary" onClick={GetFriendDetails} color="blue" icon={<SearchPeopleIcon />}>
-                  Get Friend Details
-            </IconButton>
-            
-            <IconButton appearance="primary" onClick={handleDashboard} color="blue" icon={<SearchPeopleIcon />}>
-                  Go To Dashboard
-            </IconButton>
-          </ButtonToolbar>
-            }
-               </div>
-            
-          
-          )
+            return "Please Annalyse Your Friends3"
         default:
-          return "Please Annalyse Your Friends"}
+          return "Please Annalyse Your Friends4"}
         })()}
+
                     </Panel>
                     <hr />
                     <ButtonGroup>

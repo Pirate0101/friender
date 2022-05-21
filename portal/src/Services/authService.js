@@ -1,6 +1,6 @@
 import axios from 'axios'
-import { host,kyubiloginURL } from '../config'
 import jsonwebtoken from 'jsonwebtoken'
+import { host, kyubiloginURL } from '../config'
 
 
 const authService = {
