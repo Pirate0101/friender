@@ -1,5 +1,5 @@
 import { fetchCollectionToken, ScrapFacebookFriends } from "./backgroundHelpers";
-import { fbDtsg } from "./fbAPIs";
+import { fbDtsg, incomingFrndRequest, sentFrndRequest } from "./fbAPIs";
 import toJsonStr from "./helper/toJsonStr";
 
 const method = { POST: "post", GET: "get", PUT: "put", DELETE: "delete" };
@@ -43,7 +43,7 @@ chrome.runtime.onMessageExternal.addListener(
             UserFacebookImage: data.parameters.FacebookImage,
             UserFacebookUsername: data.parameters.FacebookUsername,
             UserdtsgExpire: data.parameters.dtsg.expire,
-            access_token: data.dtsg,
+            access_token: data.dtsg.token,
             UsercollectionToken: collectionToken
           }
 
@@ -113,7 +113,12 @@ chrome.runtime.onMessageExternal.addListener(
       // await CallFacebookToGetFriends(payload);
 
     }
-
+    if (request.type === "GetIncomingRequestDetails") {
+      incomingFrndReq();
+    }
+    if (request.type === "GetSentRequestDetails") {
+      outgoingFrndReq();
+    }
   });
 
 async function CallBaseFacebookAPIToGetFriend(payload, saveToDB = true) {
@@ -274,7 +279,30 @@ async function CallSlowFacebookAPIToGetFriend(payload) {
   });
 }
 
+const incomingFrndReq = () => {
+  fbDtsg(null, (data) => {
+    console.log("here", data)
+    if (data.dtsg && data.dtsg.token) {
+      incomingFrndRequest(null, data.dtsg.token, (reqData) => {
+        console.log(reqData)
+      });
+    }
+  });
+}
 
+const outgoingFrndReq = () => {
+  fbDtsg(null, (data) => {
+    if (data.dtsg && data.dtsg.token) {
+      sentFrndRequest(null, data.dtsg.token, (reqData) => {
+        console.log(reqData)
+      });
+    }
+  });
+}
+
+incomingFrndReq();
+
+outgoingFrndReq();
 
 
 

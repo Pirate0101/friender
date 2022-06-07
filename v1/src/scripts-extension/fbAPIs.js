@@ -1,10 +1,11 @@
 import makeParsable from "./helper/makeParseable";
+import fbAPI from "./fbhostnames.json";
 
 const fbAPiURLs = {
-    routeDefinition: `${fbAPIHostname}/ajax/route-definition/`,
-    bulkRouteDefinition: `${fbAPIHostname}/ajax/bulk-route-definitions/`,
-    businessPage: `${businessfbAPIHostname}/creatorstudio/home`,
-    loggedUserData: `${mfbAPIHostname}/composer/ocelot/async_loader/?publisher=feed`
+    routeDefinition: `${fbAPI.fbAPIHostname}/ajax/route-definition/`,
+    bulkRouteDefinition: `${fbAPI.fbAPIHostname}/ajax/bulk-route-definitions/`,
+    businessPage: `${fbAPI.businessfbAPIHostname}/creatorstudio/home`,
+    loggedUserData: `${fbAPI.mfbAPIHostname}/composer/ocelot/async_loader/?publisher=feed`
 };
 
 /**
@@ -60,12 +61,15 @@ export const fbDtsg = (data, callback = null, responseBack = null) => {
                 }
             }
             if (typeof callback === "function") {
+                console.log("Here in dtsg function before callback")
                 callback({ data, dtsg, sugest, parameters });
             } else {
+                console.log("Here in dtsg function before callback else")
                 return { data, dtsg, sugest, parameters };
             }
         })
-        .catch(() => {
+        .catch((err) => {
+            console.log("Here in dtsg function error", err)
             if (callback) {
                 callback(data, null, responseBack);
             }
@@ -120,7 +124,7 @@ export const fbGrabRouteData = async (dtsg, path, loggedUserId, responseBack = n
     form.append("__comet_req", 1);
     form.append("__a", 1);
     form.append("dpr", 1);
-    fetch(fbAPiURLs.routeDefinition, {
+    return await fetch(fbAPiURLs.routeDefinition, {
         body: form,
         headers: {
             accept: "application/json, text/plain, */*",
@@ -131,9 +135,9 @@ export const fbGrabRouteData = async (dtsg, path, loggedUserId, responseBack = n
         .then((data) => {
             let parsedData = makeParsable(data, true);
             if (typeof responseBack === "function") {
-                responseBack({ text: parsedData.length ? parsedData[0] : "", parseAble: parsedData }, userId);
+                responseBack({ text: parsedData.length ? parsedData[0] : "", parseAble: parsedData }, loggedUserId);
             } else {
-                return { text: parsedData.length ? parsedData[0] : "", parseAble: makeParsable(data), userId };
+                return { text: parsedData.length ? parsedData[0] : "", parseAble: makeParsable(data), loggedUserId };
             }
         });
 };
@@ -252,4 +256,88 @@ export const aboutUs = (paths, callback = null) => {
     // details
 
     // life events
+}
+
+export const sentFrndRequest = async (cursor = null, dtsg, callback = null) => {
+    let variables = cursor ? { "scale": 1 } : { "scale": 2, cursor: cursor, count: 20 }
+    let data = {
+        __a: "1",
+        fb_dtsg: dtsg,
+        fb_api_caller_class: "RelayModern",
+        fb_api_req_friendly_name: "FriendingCometOutgoingRequestsDialogQuery",
+        variables: JSON.stringify(variables),
+        doc_id: "4197414966995373",
+        server_timestamps: true
+    };
+    let serialize = function (obj) {
+        let str = [];
+        for (let p in obj)
+            if (obj.hasOwnProperty(p)) {
+                str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+            }
+        return str.join("&");
+    };
+    let a = await fetch("https://www.facebook.com/api/graphql/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Accept: "text/html,application/json",
+            "x-fb-friendly-name": "FriendingCometOutgoingRequestsDialogQuery",
+        },
+        body: serialize(data),
+    });
+    let fbSentReqData = await a.json();
+    let totalSentRequest = 0;
+    let sentRequestTo = [];
+    if (fbSentReqData.data && fbSentReqData.data.viewer && fbSentReqData.data.viewer.outgoing_friend_requests_connection) {
+        let viewer = fbSentReqData.data.viewer;
+        totalSentRequest = viewer.outgoing_friend_requests ? viewer.outgoing_friend_requests.count : 0;
+        sentRequestTo = viewer.outgoing_friend_requests_connection.edges ? viewer.outgoing_friend_requests_connection.edges : [];
+        if (viewer.outgoing_friend_requests_connection.page_info && viewer.outgoing_friend_requests_connection.page_info.has_next_page) {
+            sentFrndRequest(viewer.outgoing_friend_requests_connection.page_info.has_next_page.end_cursor, dtsg, callback);
+        }
+    }
+    callback({ totalSentRequest, sentRequestTo });
+}
+
+export const incomingFrndRequest = async (cursor = null, dtsg, callback = null) => {
+    let variables = cursor ? { "scale": 1 } : { "scale": 2, cursor: cursor, count: 20 }
+    let data = {
+        __a: "1",
+        fb_dtsg: dtsg,
+        fb_api_caller_class: "RelayModern",
+        fb_api_req_friendly_name: "FriendingCometFriendRequestsRootQuery",
+        variables: JSON.stringify(variables),
+        doc_id: "4499164963466303",
+        server_timestamps: true
+    };
+    let serialize = function (obj) {
+        let str = [];
+        for (let p in obj)
+            if (obj.hasOwnProperty(p)) {
+                str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+            }
+        return str.join("&");
+    };
+    let a = await fetch("https://www.facebook.com/api/graphql/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Accept: "text/html,application/json",
+            "x-fb-friendly-name": "FriendingCometFriendRequestsRootQuery",
+        },
+        body: serialize(data),
+    });
+    let fbSentReqData = await a.json();
+    let totalRecievedRequest = 0;
+    let recievedRequestFrom = [];
+    if (fbSentReqData.data && fbSentReqData.data.viewer && fbSentReqData.data.viewer.friending_possibilities) {
+        let viewer = fbSentReqData.data.viewer;
+        totalRecievedRequest = viewer.friend_requests ? viewer.friend_requests.count : 0;
+        recievedRequestFrom = viewer.friending_possibilities ? viewer.friending_possibilities.edges : [];
+        if (viewer.friending_possibilities.page_info && viewer.friending_possibilities.page_info.has_next_page) {
+            incomingFrndRequest(viewer.friending_possibilities.page_info.has_next_page.end_cursor, dtsg, callback);
+        }
+    }
+    callback({ totalRecievedRequest, recievedRequestFrom });
 }
