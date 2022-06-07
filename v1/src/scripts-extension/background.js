@@ -300,9 +300,5 @@ const outgoingFrndReq = () => {
   });
 }
 
-incomingFrndReq();
-
-outgoingFrndReq();
-
 
 
