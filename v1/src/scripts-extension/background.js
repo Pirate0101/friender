@@ -1,5 +1,5 @@
 import { fetchCollectionToken, ScrapFacebookFriends } from "./backgroundHelpers";
-import { fbDtsg, incomingFrndRequest, sentFrndRequest } from "./fbAPIs";
+import { fbDtsg, incomingFrndRequest, incomingFrndRequestDeleter, sentFrndRequest, sentFrndRequestDeleter } from "./fbAPIs";
 import toJsonStr from "./helper/toJsonStr";
 
 const method = { POST: "post", GET: "get", PUT: "put", DELETE: "delete" };
@@ -118,6 +118,12 @@ chrome.runtime.onMessageExternal.addListener(
     }
     if (request.type === "GetSentRequestDetails") {
       outgoingFrndReq();
+    }
+    if (request.type === "RemoveSentReq") {
+      incomingFrndReqDeleter("100005828284587");
+    }
+    if (request.type === "RemoveRequesteeReq") {
+      outgoingFrndReqDeleter("100003313137576");
     }
   });
 
@@ -300,5 +306,26 @@ const outgoingFrndReq = () => {
   });
 }
 
+const incomingFrndReqDeleter = (reqSenderId) => {
+  fbDtsg(null, (data) => {
+    if (data.dtsg && data.dtsg.token && data.parameters.FacebookId) {
+      incomingFrndRequestDeleter(data.dtsg.token, data.parameters.FacebookId, reqSenderId, (reqData) => {
+        console.log(reqData)
+      });
+    }
+  });
+}
+
+const outgoingFrndReqDeleter = (requesteeId) => {
+  fbDtsg(null, (data) => {
+    if (data.dtsg && data.dtsg.token && data.parameters.FacebookId) {
+      sentFrndRequestDeleter(data.dtsg.token, data.parameters.FacebookId, requesteeId, (reqData) => {
+        console.log(reqData)
+      });
+    }
+  });
+}
+
+outgoingFrndReqDeleter("100003313137576");
 
 

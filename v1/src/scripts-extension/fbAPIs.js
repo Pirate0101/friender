@@ -341,3 +341,81 @@ export const incomingFrndRequest = async (cursor = null, dtsg, callback = null) 
     }
     callback({ totalRecievedRequest, recievedRequestFrom });
 }
+
+export const incomingFrndRequestDeleter = async (dtsg, loggedInUserId, requestSenderId, callback = null) => {
+    let variables = { "input": { "friend_requester_id": requestSenderId, "source": "friends_tab", "actor_id": loggedInUserId, "client_mutation_id": "5" }, "scale": 1, "refresh_num": 0 };
+    let data = {
+        __a: "1",
+        fb_dtsg: dtsg,
+        fb_api_caller_class: "RelayModern",
+        fb_api_req_friendly_name: "FriendingCometFriendRequestDeleteMutation",
+        variables: JSON.stringify(variables),
+        doc_id: "6031197466897287",
+        server_timestamps: true
+    };
+    let serialize = function (obj) {
+        let str = [];
+        for (let p in obj)
+            if (obj.hasOwnProperty(p)) {
+                str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+            }
+        return str.join("&");
+    };
+    let a = await fetch("https://www.facebook.com/api/graphql/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Accept: "text/html,application/json",
+            "x-fb-friendly-name": "FriendingCometFriendRequestDeleteMutation",
+        },
+        body: serialize(data),
+    });
+    let fbSentReqData = await a.json();
+    let requesterStatus = {};
+    if (fbSentReqData.data && fbSentReqData.data.friend_request_delete && fbSentReqData.data.friend_request_delete.friend_requester) {
+        let friendRequester = fbSentReqData.data.friend_request_delete.friend_requester;
+        if (friendRequester.id) {
+            requesterStatus = { ...friendRequester };
+        }
+    }
+    callback(requesterStatus);
+}
+
+export const sentFrndRequestDeleter = async (dtsg, loggedInUserId, requesteeId, callback = null) => {
+    let variables = { "input": { "cancelled_friend_requestee_id": requesteeId, "source": "manage_outgoing_requests", "actor_id": loggedInUserId, "client_mutation_id": "2" }, "scale": 1 };
+    let data = {
+        __a: "1",
+        fb_dtsg: dtsg,
+        fb_api_caller_class: "RelayModern",
+        fb_api_req_friendly_name: "FriendingCometFriendRequestCancelMutation",
+        variables: JSON.stringify(variables),
+        doc_id: "4387092571315002",
+        server_timestamps: true
+    };
+    let serialize = function (obj) {
+        let str = [];
+        for (let p in obj)
+            if (obj.hasOwnProperty(p)) {
+                str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+            }
+        return str.join("&");
+    };
+    let a = await fetch("https://www.facebook.com/api/graphql/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Accept: "text/html,application/json",
+            "x-fb-friendly-name": "FriendingCometFriendRequestCancelMutation",
+        },
+        body: serialize(data),
+    });
+    let fbSentReqData = await a.json();
+    let requesteeStatus = {};
+    if (fbSentReqData.data && fbSentReqData.data.friend_request_cancel && fbSentReqData.data.friend_request_cancel.cancelled_friend_requestee) {
+        let friendRequestee = fbSentReqData.data.friend_request_cancel.cancelled_friend_requestee;
+        if (friendRequestee.id) {
+            requesteeStatus = { ...friendRequestee };
+        }
+    }
+    callback(requesteeStatus);
+}
