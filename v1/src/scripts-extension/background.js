@@ -325,7 +325,3 @@ const outgoingFrndReqDeleter = (requesteeId) => {
     }
   });
 }
-
-outgoingFrndReqDeleter("100003313137576");
-
-
