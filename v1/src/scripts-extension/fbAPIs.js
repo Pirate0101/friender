@@ -419,3 +419,46 @@ export const sentFrndRequestDeleter = async (dtsg, loggedInUserId, requesteeId, 
     }
     callback(requesteeStatus);
 }
+
+export const unfriend = async (dtsg, loggedInUserId, friendFbId, callback = null) => {
+    let variables = {
+        shouldShowActivityLogDialog: false,
+        input: {
+            source: "bd_profile_button",
+            unfriended_user_id: friendFbId,
+            actor_id: loggedInUserId
+        },
+        scale: 1,
+    }
+
+    let data = {
+        __a: "1",
+        fb_dtsg: dtsg,
+        fb_api_caller_class: "RelayModern",
+        fb_api_req_friendly_name: "FriendingCometUnfriendMutation",
+        variables: JSON.stringify(variables),
+        doc_id: "4092953427497208",
+        server_timestamps: true
+    };
+
+    let serialize = function (obj) {
+        let str = [];
+        for (let p in obj)
+            if (obj.hasOwnProperty(p)) {
+                str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+            }
+        return str.join("&");
+    };
+
+    let a = await fetch("https://www.facebook.com/api/graphql/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Accept: "text/html,application/json",
+            "x-fb-friendly-name": "FriendingCometOutgoingRequestsDialogQuery",
+        },
+        body: serialize(data),
+    });
+    let fbRespond = await a.json();
+    callback(fbRespond);
+}

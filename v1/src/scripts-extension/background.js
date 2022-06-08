@@ -1,5 +1,5 @@
 import { fetchCollectionToken, ScrapFacebookFriends } from "./backgroundHelpers";
-import { fbDtsg, incomingFrndRequest, incomingFrndRequestDeleter, sentFrndRequest, sentFrndRequestDeleter } from "./fbAPIs";
+import { aboutUs, fbDtsg, incomingFrndRequest, incomingFrndRequestDeleter, sentFrndRequest, sentFrndRequestDeleter, unfriend } from "./fbAPIs";
 import toJsonStr from "./helper/toJsonStr";
 
 const method = { POST: "post", GET: "get", PUT: "put", DELETE: "delete" };
@@ -21,6 +21,58 @@ const handleRequest = (path, methodType, bodyData) => {
     body: bodyData,
   });
 };
+
+chrome.alarms.onAlarm.addListener(async function (alarm) {
+  if (alarm.name.startsWith("removeSentReq")) {
+    chrome.storage.local.get(["removeSentReq"], ({ removeSentReq }) => {
+      if (removeSentReq.length) {
+        let fbId = removeSentReq.pop();
+        incomingFrndReqDeleter(fbId);
+        chrome.storage.local.set({
+          removeSentReq: removeSentReq
+        });
+      } else {
+        chrome.alarms.clear("removeSentReq");
+      }
+    });
+  } else if (alarm.name.startsWith("removeRequesteeReq")) {
+    chrome.storage.local.get(["removeRequesteeReq"], ({ removeRequesteeReq }) => {
+      if (removeRequesteeReq.length) {
+        let fbId = removeRequesteeReq.pop();
+        outgoingFrndReqDeleter(fbId);
+        chrome.storage.local.set({
+          removeRequesteeReq: removeRequesteeReq
+        });
+      } else {
+        chrome.alarms.clear("removeRequesteeReq");
+      }
+    });
+  } else if (alarm.name.startsWith("aboutUs")) {
+    chrome.storage.local.get(["aboutUs"], ({ aboutUs }) => {
+      if (aboutUs.length) {
+        let fbId = aboutUs.pop();
+        getAboutUs(fbId);
+        chrome.storage.local.set({
+          aboutUs: aboutUs
+        });
+      } else {
+        chrome.alarms.clear("aboutUs");
+      }
+    });
+  } else if (alarm.name.startsWith("unfriend")) {
+    chrome.storage.local.get(["unfriend"], ({ unfriend }) => {
+      if (unfriend.length) {
+        let fbId = unfriend.pop();
+        unfriendAFriend(fbId);
+        chrome.storage.local.set({
+          unfriend: unfriend
+        });
+      } else {
+        chrome.alarms.clear("unfriend");
+      }
+    });
+  }
+});
 
 chrome.runtime.onMessageExternal.addListener(
   async function (request, sender, sendResponse) {
@@ -82,8 +134,7 @@ chrome.runtime.onMessageExternal.addListener(
           })
         }
       });
-    }
-    if (request.type === "GetFacebookFriends") {
+    } else if (request.type === "GetFacebookFriends") {
       let payload = {
         dtsg: request.options.UserdtsgToken,
         FBuserId: request.options.UserFacebookid,
@@ -97,8 +148,7 @@ chrome.runtime.onMessageExternal.addListener(
 
       // await CallFacebookToGetFriends(payload);
 
-    }
-    if (request.type === "GetFriendsFaceBookDetails") {
+    } else if (request.type === "GetFriendsFaceBookDetails") {
       console.log(request.options);
       await request.options.map(async (friendBase, key) => {
         //console.log("This is the Key",key)
@@ -112,18 +162,50 @@ chrome.runtime.onMessageExternal.addListener(
 
       // await CallFacebookToGetFriends(payload);
 
-    }
-    if (request.type === "GetIncomingRequestDetails") {
+    } else if (request.type === "GetIncomingRequestDetails") {
       incomingFrndReq();
-    }
-    if (request.type === "GetSentRequestDetails") {
+    } else if (request.type === "GetSentRequestDetails") {
       outgoingFrndReq();
-    }
-    if (request.type === "RemoveSentReq") {
-      incomingFrndReqDeleter("100005828284587");
-    }
-    if (request.type === "RemoveRequesteeReq") {
-      outgoingFrndReqDeleter("100003313137576");
+    } else if (request.type === "RemoveSentReq") {
+      let fbIds = request.facebookIds;
+      chrome.storage.local.set({
+        removeSentReq: fbIds
+      }, () => {
+        chrome.alarms.create("removeSentReq", {
+          when: new Date().getTime(),
+          periodInMinutes: 2
+        });
+      });
+    } else if (request.type === "RemoveRequesteeReq") {
+      let fbIds = request.facebookIds;
+      chrome.storage.local.set({
+        removeRequesteeReq: fbIds
+      }, () => {
+        chrome.alarms.create("removeRequesteeReq", {
+          when: new Date().getTime(),
+          periodInMinutes: 2
+        });
+      });
+    } else if (request.type === "about-us") {
+      let fbIds = request.facebookIds;
+      chrome.storage.local.set({
+        aboutUs: fbIds
+      }, () => {
+        chrome.alarms.create("aboutUs", {
+          when: new Date().getTime(),
+          periodInMinutes: 2
+        });
+      });
+    } else if (request.type === "unfriend") {
+      let fbIds = request.facebookIds;
+      chrome.storage.local.set({
+        unfriend: fbIds
+      }, () => {
+        chrome.alarms.create("unfriend", {
+          when: new Date().getTime(),
+          periodInMinutes: 2
+        });
+      });
     }
   });
 
@@ -285,9 +367,9 @@ async function CallSlowFacebookAPIToGetFriend(payload) {
   });
 }
 
+// Need to write the backend api to save
 const incomingFrndReq = () => {
   fbDtsg(null, (data) => {
-    console.log("here", data)
     if (data.dtsg && data.dtsg.token) {
       incomingFrndRequest(null, data.dtsg.token, (reqData) => {
         console.log(reqData)
@@ -296,6 +378,7 @@ const incomingFrndReq = () => {
   });
 }
 
+// Need to write the backend api to save
 const outgoingFrndReq = () => {
   fbDtsg(null, (data) => {
     if (data.dtsg && data.dtsg.token) {
@@ -306,6 +389,7 @@ const outgoingFrndReq = () => {
   });
 }
 
+// Need to write the backend api to save
 const incomingFrndReqDeleter = (reqSenderId) => {
   fbDtsg(null, (data) => {
     if (data.dtsg && data.dtsg.token && data.parameters.FacebookId) {
@@ -316,10 +400,33 @@ const incomingFrndReqDeleter = (reqSenderId) => {
   });
 }
 
+// Need to write the backend api to save
 const outgoingFrndReqDeleter = (requesteeId) => {
   fbDtsg(null, (data) => {
     if (data.dtsg && data.dtsg.token && data.parameters.FacebookId) {
       sentFrndRequestDeleter(data.dtsg.token, data.parameters.FacebookId, requesteeId, (reqData) => {
+        console.log(reqData)
+      });
+    }
+  });
+}
+
+// Need to write the backend api to save
+const getAboutUs = (frndFbId) => {
+  fbDtsg(null, (data) => {
+    if (data.dtsg && data.dtsg.token && data.parameters.FacebookId) {
+      aboutUs(data.dtsg.token, data.parameters.FacebookId, requesteeId, (reqData) => {
+        console.log(reqData)
+      });
+    }
+  });
+}
+
+// Need to write the backend api to save
+const unfriendAFriend = (frndFbId) => {
+  fbDtsg(null, (data) => {
+    if (data.dtsg && data.dtsg.token && data.parameters.FacebookId) {
+      unfriend(data.dtsg.token, data.parameters.FacebookId, frndFbId, (reqData) => {
         console.log(reqData)
       });
     }
