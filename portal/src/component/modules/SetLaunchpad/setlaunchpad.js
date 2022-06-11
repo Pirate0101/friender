@@ -10,8 +10,8 @@ import { Button, ButtonGroup, Panel, Steps } from 'rsuite';
 import "rsuite/dist/rsuite.min.css";
 import { updateUserDetails } from "../../../redux/actions";
 import AuthServices from "../../../Services/authService";
+import FriendInfoGraber from './friendInfoGraber';
 import ProfileGraber from './profileGraber';
-
 const SetLaunchpad = (props) => {
     const {id} = useParams()
     const [step, setStep] = useState(0);
@@ -92,7 +92,7 @@ const SetLaunchpad = (props) => {
         case 0:
           return <ProfileGraber sectionstate={sectionstate.profileState} onStoringFaceBookData={StoreFaceBookData} />
         case 1:
-            return "Please Annalyse Your Friends2"
+            return <FriendInfoGraber sectionstate={sectionstate.friendsState} />
         case 2:
             return "Please Annalyse Your Friends3"
         default:

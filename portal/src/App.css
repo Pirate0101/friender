@@ -6743,19 +6743,19 @@ textarea.form-control-lg {
 
 .text-success {
   --bs-text-opacity: 1;
-  color: rgba(var(--bs-success-rgb), var(--bs-text-opacity)) !important; }
+  color: #1bcfb4 !important; }
 
 .text-info {
   --bs-text-opacity: 1;
-  color: rgba(var(--bs-info-rgb), var(--bs-text-opacity)) !important; }
+  color: #198ae3 !important; }
 
 .text-warning {
   --bs-text-opacity: 1;
-  color: rgba(var(--bs-warning-rgb), var(--bs-text-opacity)) !important; }
+  color: #fed713 !important; }
 
 .text-danger {
   --bs-text-opacity: 1;
-  color: rgba(var(--bs-danger-rgb), var(--bs-text-opacity)) !important; }
+  color: #fe7c96 !important; }
 
 .text-light {
   --bs-text-opacity: 1;
