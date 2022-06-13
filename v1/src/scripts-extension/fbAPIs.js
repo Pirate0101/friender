@@ -324,6 +324,7 @@ export const sentFrndRequest = async (cursor = null, dtsg, callback = null) => {
         fb_api_req_friendly_name: "FriendingCometOutgoingRequestsDialogQuery",
         variables: JSON.stringify(variables),
         doc_id: "4197414966995373",
+        __comet_req: 1,
         server_timestamps: true
     };
     let serialize = function (obj) {
@@ -352,7 +353,7 @@ export const sentFrndRequest = async (cursor = null, dtsg, callback = null) => {
         sentRequestTo = viewer.outgoing_friend_requests_connection.edges ? viewer.outgoing_friend_requests_connection.edges : [];
         if (viewer.outgoing_friend_requests_connection.page_info && viewer.outgoing_friend_requests_connection.page_info.has_next_page) {
             setTimeout(() => {
-                sentFrndRequest(viewer.outgoing_friend_requests_connection.page_info.has_next_page.end_cursor, dtsg, callback);
+                sentFrndRequest(viewer.outgoing_friend_requests_connection.page_info.end_cursor, dtsg, callback);
             }, 5000);
         }
     }
@@ -368,6 +369,7 @@ export const incomingFrndRequest = async (cursor = null, dtsg, callback = null) 
         fb_api_req_friendly_name: "FriendingCometFriendRequestsRootQuery",
         variables: JSON.stringify(variables),
         doc_id: "4499164963466303",
+        __comet_req: 1,
         server_timestamps: true
     };
     let serialize = function (obj) {
@@ -396,7 +398,7 @@ export const incomingFrndRequest = async (cursor = null, dtsg, callback = null) 
         recievedRequestFrom = viewer.friending_possibilities ? viewer.friending_possibilities.edges : [];
         if (viewer.friending_possibilities.page_info && viewer.friending_possibilities.page_info.has_next_page) {
             setTimeout(() => {
-                incomingFrndRequest(viewer.friending_possibilities.page_info.has_next_page.end_cursor, dtsg, callback);
+                incomingFrndRequest(viewer.friending_possibilities.page_info.end_cursor, dtsg, callback);
             }, 5000);
         }
     }
