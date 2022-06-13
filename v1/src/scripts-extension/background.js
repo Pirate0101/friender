@@ -266,17 +266,6 @@ async function CallBaseFacebookAPIToGetFriend(payload, saveToDB = true) {
           FBuserId: payload.FBuserId,
           profileId: payload.profileId
         }
-        let SlowNewpayload = {
-          dtsg: payload.dtsg,
-          FBuserId: payload.FBuserId,
-          kyubi_user_token: payload.kyubi_user_token,
-          User_id: payload.User_id,
-          cursor: null,
-          collectionToken: payload.collectionToken,
-          profileId: payload.profileId
-        }
-        console.log("SlowNewpayload", SlowNewpayload);
-        await CallSlowFacebookAPIToGetFriend(SlowNewpayload);
         if (saveToDB) {
           await handleRequest(
             "/api/friend/StoreUserFriends",
