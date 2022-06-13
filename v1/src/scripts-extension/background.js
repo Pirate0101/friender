@@ -1,5 +1,5 @@
-import { fetchCollectionToken, ScrapFacebookFriends } from "./backgroundHelpers";
-import { aboutUs, fbDtsg, incomingFrndRequest, incomingFrndRequestDeleter, sentFrndRequest, sentFrndRequestDeleter, unfriend } from "./fbAPIs";
+import { fetchCollectionToken, ScrapFacebookFriends, ScrapSlowFacebookFriends } from "./backgroundHelpers";
+import { aboutUs, fbDtsg, incomingFrndRequest, incomingFrndRequestDeleter, messageCount, sentFrndRequest, sentFrndRequestDeleter, unfriend } from "./fbAPIs";
 import toJsonStr from "./helper/toJsonStr";
 
 const method = { POST: "post", GET: "get", PUT: "put", DELETE: "delete" };
@@ -51,7 +51,7 @@ chrome.alarms.onAlarm.addListener(async function (alarm) {
     chrome.storage.local.get(["aboutUs"], ({ aboutUs }) => {
       if (aboutUs.length) {
         let fbId = aboutUs.pop();
-        getAboutUs(fbId);
+        getAboutUs([fbId]);
         chrome.storage.local.set({
           aboutUs: aboutUs
         });
@@ -135,16 +135,20 @@ chrome.runtime.onMessageExternal.addListener(
         }
       });
     } else if (request.type === "GetFacebookFriends") {
-      let payload = {
-        dtsg: request.options.UserdtsgToken,
-        FBuserId: request.options.UserFacebookid,
-        kyubi_user_token: request.options.kyubi_user_token,
-        User_id: request.options._id,
-        cursor: request.options.end_cursor,
-        collectionToken: request.options.UsercollectionToken,
-        profileId: request.options.UserProfileId
-      }
-      await CallBaseFacebookAPIToGetFriend(payload, false);
+      fbDtsg(null, async (data) => {
+        if (data.dtsg && data.dtsg.token) {
+          let payload = {
+            dtsg: data.dtsg.token,
+            FBuserId: request.options.UserFacebookid,
+            kyubi_user_token: request.options.kyubi_user_token,
+            User_id: request.options._id,
+            cursor: request.options.end_cursor,
+            collectionToken: request.options.UsercollectionToken,
+            profileId: request.options.UserProfileId
+          }
+          await CallBaseFacebookAPIToGetFriend(payload, false);
+        }
+      });
 
       // await CallFacebookToGetFriends(payload);
 
@@ -206,6 +210,8 @@ chrome.runtime.onMessageExternal.addListener(
           periodInMinutes: 2
         });
       });
+    } else if (request.type === "getMessageCount") {
+      getMessageCount();
     }
   });
 
@@ -222,7 +228,7 @@ async function CallBaseFacebookAPIToGetFriend(payload, saveToDB = true) {
           FBuserId: payload.FBuserId,
           kyubi_user_token: payload.kyubi_user_token,
           User_id: payload.User_id,
-          cursor: EachFriends.cursor,
+          cursor: result.end_cursor,
           collectionToken: payload.collectionToken,
           profileId: payload.profileId
         }
@@ -260,6 +266,17 @@ async function CallBaseFacebookAPIToGetFriend(payload, saveToDB = true) {
           FBuserId: payload.FBuserId,
           profileId: payload.profileId
         }
+        let SlowNewpayload = {
+          dtsg: payload.dtsg,
+          FBuserId: payload.FBuserId,
+          kyubi_user_token: payload.kyubi_user_token,
+          User_id: payload.User_id,
+          cursor: null,
+          collectionToken: payload.collectionToken,
+          profileId: payload.profileId
+        }
+        console.log("SlowNewpayload", SlowNewpayload);
+        await CallSlowFacebookAPIToGetFriend(SlowNewpayload);
         if (saveToDB) {
           await handleRequest(
             "/api/friend/StoreUserFriends",
@@ -284,7 +301,7 @@ async function CallBaseFacebookAPIToGetFriend(payload, saveToDB = true) {
           })
         } else {
           Newpayload.cursor = null;
-          await CallBaseFacebookAPIToGetFriend(Newpayload);
+          await CallBaseFacebookAPIToGetFriend(Newpayload, true);
         }
         console.log("This are the friends Request i have", friendsArray);
       }
@@ -294,6 +311,7 @@ async function CallBaseFacebookAPIToGetFriend(payload, saveToDB = true) {
 }
 
 async function CallSlowFacebookAPIToGetFriend(payload) {
+  console.log("Here before ScrapSlowFacebookFriends")
   await ScrapSlowFacebookFriends(payload).then(async result => {
     console.log("This Is what I got from Facebook =============", result);
     if (result.success === true) {
@@ -306,7 +324,7 @@ async function CallSlowFacebookAPIToGetFriend(payload) {
           FBuserId: payload.FBuserId,
           kyubi_user_token: payload.kyubi_user_token,
           User_id: payload.User_id,
-          cursor: EachFriends.cursor,
+          cursor: result.end_cursor,
           collectionToken: payload.collectionToken,
           profileId: payload.profileId
         }
@@ -357,7 +375,7 @@ async function CallSlowFacebookAPIToGetFriend(payload) {
             collectionToken: payload.collectionToken,
             profileId: payload.profileId
           }
-          //await CallSlowFacebookAPIToGetFriend(SlowNewpayload);
+          await CallSlowFacebookAPIToGetFriend(SlowNewpayload);
         }).catch(error => {
           console.log("We are really Sorry we found error in fetching the Profile Info", error);
         })
@@ -412,14 +430,12 @@ const outgoingFrndReqDeleter = (requesteeId) => {
 }
 
 // Need to write the backend api to save
-const getAboutUs = (frndFbId) => {
-  fbDtsg(null, (data) => {
-    if (data.dtsg && data.dtsg.token && data.parameters.FacebookId) {
-      aboutUs(data.dtsg.token, data.parameters.FacebookId, requesteeId, (reqData) => {
-        console.log(reqData)
-      });
-    }
-  });
+const getAboutUs = (paths) => {
+  if (paths.length) {
+    aboutUs(paths, (reqData) => {
+      console.log(reqData)
+    });
+  }
 }
 
 // Need to write the backend api to save
@@ -432,3 +448,18 @@ const unfriendAFriend = (frndFbId) => {
     }
   });
 }
+
+// Need to write the backend api to save
+const getMessageCount = () => {
+  fbDtsg(null, (data) => {
+    if (data.dtsg && data.dtsg.token && data.parameters.FacebookId) {
+      messageCount(data.dtsg.token, (reqData) => {
+        console.log(reqData, { loggedInUserId: data.parameters.FacebookId })
+      });
+    }
+  });
+}
+
+// getMessageCount();
+
+// getAboutUs(["/iabhisekbosepm/about_overview"]);

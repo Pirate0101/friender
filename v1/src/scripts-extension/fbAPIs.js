@@ -161,7 +161,7 @@ export const fbGrabRouteMultiData = async (dtsg, paths, loggedUserId, responseBa
     form.append("__comet_req", 1);
     form.append("__a", 1);
     form.append("dpr", 1);
-    fetch(fbAPiURLs.routeDefinition, {
+    fetch(fbAPiURLs.bulkRouteDefinition, {
         body: form,
         headers: {
             accept: "application/json, text/plain, */*",
@@ -172,16 +172,17 @@ export const fbGrabRouteMultiData = async (dtsg, paths, loggedUserId, responseBa
         .then((data) => {
             let parsedData = makeParsable(data, true);
             if (typeof responseBack === "function") {
-                responseBack({ text: parsedData.length ? parsedData[0] : "", parseAble: parsedData }, userId);
+                responseBack({ text: parsedData.length ? parsedData[0] : "", parseAble: parsedData.length && typeof parsedData === "object" ? JSON.parse(parsedData[0]) : parsedData }, loggedUserId);
             } else {
-                return { text: parsedData.length ? parsedData[0] : "", parseAble: makeParsable(data), userId };
+                return { text: parsedData.length ? parsedData[0] : "", parseAble: makeParsable(data), loggedUserId };
             }
         });
 };
 
 export const aboutUs = (paths, callback = null) => {
+    let sendToCallback = {};
     fbDtsg(null, (data) => {
-        fbGrabRouteMultiData(data.dtsg, paths, data.parameters.FacebookId, (routeDef) => {
+        fbGrabRouteMultiData(data.dtsg.token, paths, data.parameters.FacebookId, async (routeDef) => {
             // "/beta.vaughan.7/about_overview"
             // "/beta.vaughan.7/about_work_and_education"
             // "/beta.vaughan.7/about_places"
@@ -201,65 +202,121 @@ export const aboutUs = (paths, callback = null) => {
             * viewerID - 100064621826160
             */
 
-            /**
-                var loggedInUserId = "100064621826160";
-                var userIDForAboutUsPage = "100067189421485";
-                var commonNumber = `2327158227`;
-                var collectionToken = btoa(`app_collection:${userIDForAboutUsPage}:${commonNumber}:201`);
-                var appSection = btoa(`app_section:${userIDForAboutUsPage}:${commonNumber}`);
-                var rawSectionToken = `AQHRuIjHovXd4m5WB3YGqcZbzDKxaVkJukbZuPxInY4uz7segydC5AB5aZCjreLE6KvZ1peaiKx5cqSfg5qfpnNi6TC5MsLgWl628tYu3Qs_Rj0`;
-                var appSectionFeedKey = `ProfileCometAppSectionFeed_timeline_nav_app_sections__${rawSectionToken}`
+            // var loggedInUserId = "100064621826160";
+            // var userIDForAboutUsPage = "100067189421485";
+            // var commonNumber = `2327158227`;
+            // var collectionToken = btoa(`app_collection:${userIDForAboutUsPage}:${commonNumber}:201`);
+            // var appSection = btoa(`app_section:${userIDForAboutUsPage}:${commonNumber}`);
+            // var rawSectionToken = `AQHRuIjHovXd4m5WB3YGqcZbzDKxaVkJukbZuPxInY4uz7segydC5AB5aZCjreLE6KvZ1peaiKx5cqSfg5qfpnNi6TC5MsLgWl628tYu3Qs_Rj0`;
 
-                var variables = {"collectionToken": collectionToken, appSectionFeedKey: appSectionFeedKey, rawSectionToken: rawSectionToken, "pageID": userIDForAboutUsPage, "scale": 1, "sectionToken": "YXBwX3NlY3Rpb246MTAwMDY3MTg5NDIxNDg1OjIzMjcxNTgyMjc=", "showReactions": true, "userID": userIDForAboutUsPage }
+            if (paths.length &&
+                routeDef &&
+                routeDef.parseAble &&
+                routeDef.parseAble.payload &&
+                routeDef.parseAble.payload.payloads &&
+                routeDef.parseAble.payload.payloads[paths[0]] &&
+                routeDef.parseAble.payload.payloads[paths[0]].result &&
+                routeDef.parseAble.payload.payloads[paths[0]].result.exports &&
+                routeDef.parseAble.payload.payloads[paths[0]].result.exports.hostableView &&
+                routeDef.parseAble.payload.payloads[paths[0]].result.exports.hostableView.props &&
+                routeDef.parseAble.payload.payloads[paths[0]].result.exports.hostableView.props.collectionToken) {
 
-                var data = {
+                let props = routeDef.parseAble.payload.payloads[paths[0]].result.exports.hostableView.props;
+                let collectionToken = props.collectionToken;
+                let rawSectionToken = props.rawSectionToken;
+                let sectionToken = props.sectionToken;
+                let userIDForAboutUsPage = props.userID;
+                // let userVanity = props.userVanity;
+                let loggedInUserId = props.viewerID;
+                let appSectionFeedKey = `ProfileCometAppSectionFeed_timeline_nav_app_sections__${rawSectionToken}`
+
+                let variables = { "collectionToken": collectionToken, appSectionFeedKey: appSectionFeedKey, rawSectionToken: rawSectionToken, "pageID": userIDForAboutUsPage, "scale": 1, "sectionToken": sectionToken, "showReactions": true, "userID": userIDForAboutUsPage }
+
+                let dataToSend = {
                     __a: "1",
-                    fb_dtsg: "AQHGSJUISojlUdA:28:1650440610",
+                    __user: loggedInUserId,
+                    __comet_req: 1,
+                    fb_dtsg: data.dtsg.token,
                     fb_api_caller_class: "RelayModern",
                     fb_api_req_friendly_name: "ProfileCometAboutAppSectionQuery",
                     variables: JSON.stringify(variables),
-                    doc_id: "5018835244901653",
+                    doc_id: "7745404085500329",
                 };
 
-                var serialize = function (obj) {
-                    var str = [];
-                    for (var p in obj)
+                let serialize = function (obj) {
+                    let str = [];
+                    for (let p in obj)
                         if (obj.hasOwnProperty(p)) {
                             str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
                         }
                     return str.join("&");
                 };
 
-                var a = await fetch("https://www.facebook.com/api/graphql/", {
+                let a = await fetch("https://www.facebook.com/api/graphql/", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded",
                         Accept: "text/html,application/json",
                         "x-fb-friendly-name": "ProfileCometAboutAppSectionQuery",
                     },
-                    body: serialize(data),
+                    body: serialize(dataToSend),
                 });
-                await a.text();
-             */
+                let resp = await a.text();
+                resp = makeParsable(resp, true);
+                if (resp.length) {
+                    resp = JSON.parse(resp[0]);
+                    console.log("resp", resp)
+                    if (resp.data &&
+                        resp.data.user &&
+                        resp.data.user.about_app_sections &&
+                        resp.data.user.about_app_sections.nodes &&
+                        resp.data.user.about_app_sections.nodes.length) {
+
+                        let node = resp.data.user.about_app_sections.nodes[0];
+                        if (node.activeCollections &&
+                            node.activeCollections.nodes &&
+                            node.activeCollections.nodes.length &&
+                            node.activeCollections.nodes[0].style_renderer &&
+                            node.activeCollections.nodes[0].style_renderer.profile_field_sections &&
+                            node.activeCollections.nodes[0].style_renderer.profile_field_sections.length) {
+
+                            let profileFieldSections = node.activeCollections.nodes[0].style_renderer.profile_field_sections;
+                            profileFieldSections.forEach((fieldSection) => {
+                                sendToCallback[fieldSection.field_section_type] = {
+                                    title: fieldSection.title ? fieldSection.title.text : fieldSection.field_section_type,
+                                    profileFields: {}
+                                };
+                                fieldSection.profile_fields.nodes.forEach((profileFieldNodes) => {
+                                    if (profileFieldNodes.field_type !== "null_state") {
+                                        let textContent = profileFieldNodes.title.text;
+                                        if (profileFieldNodes.renderer && profileFieldNodes.renderer.field && profileFieldNodes.renderer.field.text_content) {
+                                            textContent = profileFieldNodes.renderer.field.text_content.text;
+                                        } else if (profileFieldNodes.renderer && profileFieldNodes.renderer.field && profileFieldNodes.renderer.field.title) {
+                                            textContent = profileFieldNodes.renderer.field.title.text;
+                                        }
+                                        if (sendToCallback[fieldSection.field_section_type].profileFields[profileFieldNodes.field_type]) {
+                                            sendToCallback[fieldSection.field_section_type].profileFields[profileFieldNodes.field_type].push({
+                                                text: textContent
+                                            })
+                                        } else {
+                                            sendToCallback[fieldSection.field_section_type].profileFields[profileFieldNodes.field_type] = [{
+                                                text: textContent
+                                            }]
+                                        }
+                                    }
+                                });
+                            });
+                        }
+                    }
+                }
+            }
+            callback(sendToCallback)
         });
     });
-    // overview
-
-    // work & education
-
-    // places lived
-
-    // contact and basic info
-
-    // family and relationships
-
-    // details
-
-    // life events
 }
 
 export const sentFrndRequest = async (cursor = null, dtsg, callback = null) => {
-    let variables = cursor ? { "scale": 1 } : { "scale": 2, cursor: cursor, count: 20 }
+    let variables = !cursor ? { "scale": 1 } : { "scale": 2, cursor: cursor, count: 20 }
     let data = {
         __a: "1",
         fb_dtsg: dtsg,
@@ -294,14 +351,16 @@ export const sentFrndRequest = async (cursor = null, dtsg, callback = null) => {
         totalSentRequest = viewer.outgoing_friend_requests ? viewer.outgoing_friend_requests.count : 0;
         sentRequestTo = viewer.outgoing_friend_requests_connection.edges ? viewer.outgoing_friend_requests_connection.edges : [];
         if (viewer.outgoing_friend_requests_connection.page_info && viewer.outgoing_friend_requests_connection.page_info.has_next_page) {
-            sentFrndRequest(viewer.outgoing_friend_requests_connection.page_info.has_next_page.end_cursor, dtsg, callback);
+            setTimeout(() => {
+                sentFrndRequest(viewer.outgoing_friend_requests_connection.page_info.has_next_page.end_cursor, dtsg, callback);
+            }, 5000);
         }
     }
     callback({ totalSentRequest, sentRequestTo });
 }
 
 export const incomingFrndRequest = async (cursor = null, dtsg, callback = null) => {
-    let variables = cursor ? { "scale": 1 } : { "scale": 2, cursor: cursor, count: 20 }
+    let variables = !cursor ? { "scale": 1 } : { "scale": 2, cursor: cursor, count: 20 }
     let data = {
         __a: "1",
         fb_dtsg: dtsg,
@@ -336,7 +395,9 @@ export const incomingFrndRequest = async (cursor = null, dtsg, callback = null) 
         totalRecievedRequest = viewer.friend_requests ? viewer.friend_requests.count : 0;
         recievedRequestFrom = viewer.friending_possibilities ? viewer.friending_possibilities.edges : [];
         if (viewer.friending_possibilities.page_info && viewer.friending_possibilities.page_info.has_next_page) {
-            incomingFrndRequest(viewer.friending_possibilities.page_info.has_next_page.end_cursor, dtsg, callback);
+            setTimeout(() => {
+                incomingFrndRequest(viewer.friending_possibilities.page_info.has_next_page.end_cursor, dtsg, callback);
+            }, 5000);
         }
     }
     callback({ totalRecievedRequest, recievedRequestFrom });
@@ -461,4 +522,29 @@ export const unfriend = async (dtsg, loggedInUserId, friendFbId, callback = null
     });
     let fbRespond = await a.json();
     callback(fbRespond);
+}
+
+export const messageCount = async (dtsg, callback = null) => {
+    let form = new FormData();
+    form.append("fb_dtsg", dtsg);
+    form.append(
+        "q",
+        `viewer(){message_threads{nodes{thread_key{thread_fbid,other_user_id},messages_count,thread_type,updated_time_precise}}}`
+    );
+    let e = await fetch("https://www.facebook.com/api/graphql/", {
+        body: form,
+        headers: {
+            accept: "application/json, text/plain, */*",
+        },
+        method: "POST",
+    });
+    let data = await e.json();
+    let dataToSend = [];
+    if (data.viewer &&
+        data.viewer.message_threads &&
+        data.viewer.message_threads.nodes &&
+        data.viewer.message_threads.nodes.length) {
+        dataToSend = data.viewer.message_threads.nodes;
+    }
+    callback(dataToSend);
 }

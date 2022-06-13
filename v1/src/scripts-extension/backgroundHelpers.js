@@ -26,6 +26,7 @@ const serializeFBFriendReq = (FBuserId, dtsg, cursor) => {
       fb_dtsg: dtsg,
       fb_api_caller_class: "RelayModern",
       fb_api_req_friendly_name: "FriendingCometFriendsListPaginationQuery",
+      __comet_req: 1,
       variables: JSON.stringify({
         count: 30,
         cursor: cursor,
@@ -33,7 +34,7 @@ const serializeFBFriendReq = (FBuserId, dtsg, cursor) => {
         scale: 1,
       }),
       server_timestamps: true,
-      doc_id: 5393753507311167,
+      doc_id: 4858065864249125,
     };
     let str = [];
     for (let p in rawData)
@@ -127,8 +128,9 @@ const serializeFBSlowFriendReq = (FBuserId, dtsg, cursor, collectionToken) => {
       fb_dtsg: dtsg,
       fb_api_caller_class: "RelayModern",
       fb_api_req_friendly_name: "ProfileCometAppCollectionListRendererPaginationQuery",
+      __comet_req: 1,
       variables: JSON.stringify({
-        count: 20,
+        count: 8,
         cursor: cursor,
         search: null,
         scale: 1,

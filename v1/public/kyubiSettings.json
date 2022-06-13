@@ -55,5 +55,5 @@
     "publicVapidKey": "BHcFkqcSHe3BS6EPkUWzYCXM2v4nSd541MqGyEao2EaSQeaQ_xfZrb8IcSasVN1G5pAwmDpXLNIjR7kTnEePOCA",
     "clearSubscriptionObjectURL": "https://dev.kyubi.io/api/clear-subscription-object",
     "registerNotificationView": "https://dev.kyubi.io/api/notification-view",
-    "appBaseBackendUrl": ""
+    "appBaseBackendUrl": "http://localhost:8081"
    }
