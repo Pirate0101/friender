@@ -1,5 +1,6 @@
 /* eslint-disable no-undef */
 import { Fragment, useEffect, useState } from 'react';
+import io from "socket.io-client";
 import StepCardpro from './stepCardPro';
 const FriendInfoGraber= (props)=>{
     const [friendsectionstate,setFriendSectionState]=useState({
@@ -100,7 +101,19 @@ const FriendInfoGraber= (props)=>{
             
         };
         console.log("This is the Profile Info",parameter);
-        chrome.runtime.sendMessage("hpmbpcfmakloddoojdfppcgdagnclbmn",{type: "GetSentRequestDetails", options: parameter});
+        chrome.runtime.sendMessage("hpmbpcfmakloddoojdfppcgdagnclbmn",{type: "GetFacebookFriends", options: parameter});
+        const ENDPOINT = "ws://localhost:5000/";
+        const socket = io(ENDPOINT, {
+        transports: ["websocket", "polling"] ,// use WebSocket first, if available
+        });
+        await socket.emit('join', ProfileData.kyubi_user_token);
+        await socket.on('userFacebookFriendSend',async message => {
+            console.log("This is the Return I got",message);
+            if(message.FriendType==="active" && message.ScrapingStatus===true){
+                settotalActiveFriendStat({...totalActiveFriendStat,"pstate":"Scraping-In-Progress"})
+                await 
+            }
+        });
     }
     return (
     <div className="col-md-12 stretch-card grid-margin">
