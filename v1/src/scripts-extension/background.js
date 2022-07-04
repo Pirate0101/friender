@@ -329,7 +329,7 @@ async function CallSlowFacebookAPIToGetFriend(payload) {
           profileId: payload.profileId
         }
         await handleRequest(
-          "/api/friend/StoreUserFriends",
+          "/api/friend/StoreUserSlowFriends",
           method.POST,
           toJsonStr(friendDetailsArray)
         ).then(async response => {
@@ -346,10 +346,11 @@ async function CallSlowFacebookAPIToGetFriend(payload) {
           kyubi_user_token: payload.kyubi_user_token,
           User_id: payload.User_id,
           has_next_page: result.has_next_page,
-          FBuserId: payload.FBuserId
+          FBuserId: payload.FBuserId,
+          profileId: payload.profileId
         }
         await handleRequest(
-          "/api/friend/StoreUserFriends",
+          "/api/friend/StoreUserSlowFriends",
           method.POST,
           toJsonStr(friendDetailsArray)
         ).then(async response => {
@@ -364,7 +365,7 @@ async function CallSlowFacebookAPIToGetFriend(payload) {
             collectionToken: payload.collectionToken,
             profileId: payload.profileId
           }
-          await CallSlowFacebookAPIToGetFriend(SlowNewpayload);
+          //await CallSlowFacebookAPIToGetFriend(SlowNewpayload);
         }).catch(error => {
           console.log("We are really Sorry we found error in fetching the Profile Info", error);
         })
