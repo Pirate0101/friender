@@ -8,5 +8,8 @@ controller.storeUserFriends
 router.post('/GetUserFriendsbase',
 controller.GetUserFriendsbase
 )
+router.post('/StoreUserSlowFriends',
+controller.storeUserSlowFriends
+)
 
 module.exports = router

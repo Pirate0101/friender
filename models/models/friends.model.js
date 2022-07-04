@@ -48,6 +48,10 @@ const FriendsSchema = new Schema({
         type: String,
         default: ''
     },
+    desider: {
+        type: Number,
+        default: 0
+    },
     createdAt: {
       type: Date,
       default: Date.now(),
